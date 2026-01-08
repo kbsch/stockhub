@@ -1,0 +1,5 @@
+{
+  "buildCommand": "npm run build -w @stockhub/client",
+  "outputDirectory": "packages/client/dist",
+  "framework": "vite"
+}

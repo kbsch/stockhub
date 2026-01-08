@@ -13,6 +13,7 @@
     "lint": "npm run lint --workspaces --if-present"
   },
   "devDependencies": {
+    "@vercel/node": "^5.5.16",
     "concurrently": "^8.2.2",
     "typescript": "^5.3.3"
   }
