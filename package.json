@@ -1,0 +1,19 @@
+{
+  "name": "stockhub",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:client": "npm run dev -w @stockhub/client",
+    "dev:server": "npm run dev -w @stockhub/server",
+    "build": "npm run build -w @stockhub/server && npm run build -w @stockhub/client",
+    "lint": "npm run lint --workspaces --if-present"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "typescript": "^5.3.3"
+  }
+}
