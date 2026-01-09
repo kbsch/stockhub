@@ -224,39 +224,6 @@ const COMPANY_NAMES: Record<string, string> = {
   truist: 'TFC',
 };
 
-// Common tickers that should be recognized even in lowercase
-const KNOWN_TICKERS = new Set([
-  'AAPL', 'MSFT', 'GOOGL', 'GOOG', 'AMZN', 'TSLA', 'NVDA', 'META', 'NFLX',
-  'AMD', 'INTC', 'QCOM', 'AVGO', 'MU', 'TSM', 'ASML', 'ARM', 'SMCI',
-  'JPM', 'BAC', 'WFC', 'GS', 'MS', 'C', 'USB', 'PNC', 'TFC', 'COF',
-  'V', 'MA', 'PYPL', 'SQ', 'COIN', 'HOOD', 'SOFI',
-  'DIS', 'NFLX', 'PARA', 'WBD', 'FOX', 'SPOT', 'ROKU',
-  'BA', 'LMT', 'RTX', 'NOC', 'GD',
-  'XOM', 'CVX', 'COP', 'SLB', 'HAL', 'BP', 'SHEL',
-  'JNJ', 'PFE', 'MRNA', 'MRK', 'LLY', 'ABBV', 'AMGN', 'GILD', 'REGN', 'BIIB',
-  'UNH', 'ELV', 'CI', 'HUM', 'CVS', 'WBA',
-  'WMT', 'TGT', 'COST', 'HD', 'LOW', 'DG', 'DLTR', 'ROST', 'TJX',
-  'MCD', 'SBUX', 'CMG', 'YUM', 'DPZ', 'DRI',
-  'KO', 'PEP', 'MNST', 'STZ', 'BUD',
-  'PG', 'UL', 'CL', 'KMB', 'EL',
-  'NKE', 'LULU', 'UAA', 'GPS', 'RL',
-  'T', 'VZ', 'TMUS', 'CMCSA', 'CHTR',
-  'CRM', 'ADBE', 'ORCL', 'NOW', 'WDAY', 'PLTR', 'SNOW', 'MDB', 'NET', 'DDOG',
-  'CRWD', 'ZS', 'PANW', 'FTNT', 'OKTA',
-  'UBER', 'LYFT', 'ABNB', 'DASH', 'CART',
-  'F', 'GM', 'TM', 'RIVN', 'LCID', 'NIO', 'RACE',
-  'CAT', 'DE', 'MMM', 'HON', 'GE',
-  'UPS', 'FDX', 'UNP', 'CSX',
-  'BLK', 'SCHW', 'AXP', 'DFS',
-  'SPY', 'QQQ', 'IWM', 'DIA', 'VTI', 'VOO', 'VXX', 'UVXY', 'SQQQ', 'TQQQ',
-  'XLF', 'XLE', 'XLK', 'XLV', 'XLI', 'XLP', 'XLY', 'XLU', 'XLB', 'XLRE',
-  'GLD', 'SLV', 'USO', 'UNG', 'ARKK', 'ARKG', 'ARKF', 'ARKW',
-  'GME', 'AMC', 'BBBY', 'BB', 'NOK', 'PLTR', 'WISH', 'CLOV', 'SPCE',
-  'ZM', 'DOCU', 'TWLO', 'PTON', 'RBLX', 'U', 'EA', 'ATVI', 'TTWO', 'DKNG',
-  'DELL', 'HPQ', 'IBM', 'CSCO',
-  'BRK.A', 'BRK.B', 'BRK-A', 'BRK-B',
-]);
-
 // CUSIP check digit validation
 function validateCusip(cusip: string): boolean {
   if (cusip.length !== 9) return false;
@@ -465,70 +432,6 @@ export function parseAssets(text: string): ParsedAsset[] {
           originalText: foundMatch ? foundMatch[0] : name,
         });
       }
-    }
-  }
-
-  // 6. Parse tickers (case-insensitive for known tickers, uppercase-only for unknown)
-  const tickerRegex = /\b([A-Za-z]{1,5})\b/g;
-
-  // Skip common English words
-  const skipWords = new Set([
-    'THE', 'AND', 'FOR', 'ARE', 'BUT', 'NOT', 'YOU', 'ALL', 'CAN', 'HAD',
-    'HER', 'WAS', 'ONE', 'OUR', 'OUT', 'DAY', 'GET', 'HAS', 'HIM', 'HIS',
-    'HOW', 'ITS', 'MAY', 'NEW', 'NOW', 'OLD', 'SEE', 'WAY', 'WHO', 'BOY',
-    'DID', 'SAY', 'SHE', 'TOO', 'USE', 'JUST', 'LIKE', 'LONG', 'MAKE',
-    'MANY', 'OVER', 'SUCH', 'TAKE', 'THAN', 'THEM', 'WELL', 'WERE', 'WHAT',
-    'WHEN', 'YOUR', 'BEEN', 'CALL', 'COME', 'COULD', 'DOWN', 'EACH', 'FIND',
-    'FIRST', 'FROM', 'HAVE', 'INTO', 'LOOK', 'MORE', 'MOST', 'ONLY', 'PART',
-    'SOME', 'THEN', 'THAT', 'THESE', 'THIS', 'TIME', 'VERY', 'WILL', 'WITH',
-    'WORD', 'WORK', 'YEAR', 'ALSO', 'BACK', 'BEEN', 'BEING', 'BOTH', 'BIG',
-    'HIGH', 'LOW', 'EVERY', 'GOOD', 'GREAT', 'JUST', 'KNOW', 'LAST', 'LITTLE',
-    'MUCH', 'NEED', 'NEVER', 'OTHER', 'PEOPLE', 'STILL', 'THINK', 'THOSE',
-    'THROUGH', 'WANT', 'WOULD', 'YEARS', 'PUT', 'PUTS', 'GOING', 'STOCK',
-    'STOCKS', 'BUY', 'SELL', 'HOLD', 'LONG', 'SHORT', 'BULL', 'BEAR', 'CALLS',
-    'OPTION', 'OPTIONS', 'ETF', 'ETFS', 'LOOKING', 'WILD', 'BULLISH', 'BEARISH',
-    'I', 'A', 'AN', 'AS', 'AT', 'BE', 'BY', 'DO', 'GO', 'HE', 'IF', 'IN',
-    'IS', 'IT', 'ME', 'MY', 'NO', 'OF', 'ON', 'OR', 'SO', 'TO', 'UP', 'US',
-    'WE', 'AM', 'IM', 'BEEN', 'BEING', 'DOES', 'DONE', 'GAVE', 'GIVE', 'GOES',
-    'GONE', 'GOT', 'HAVE', 'HERE', 'JUST', 'KEEP', 'KEPT', 'KNOW', 'KNEW',
-    'LAST', 'LEFT', 'LET', 'LETS', 'MADE', 'MAKE', 'MOVE', 'MUCH', 'MUST',
-    'NEXT', 'ONCE', 'ONLY', 'OVER', 'PAST', 'SAME', 'SEEM', 'SHOW', 'SIDE',
-    'SOME', 'SOON', 'SUCH', 'SURE', 'TELL', 'THEM', 'THEN', 'THEY', 'TOLD',
-    'TOOK', 'TURN', 'UPON', 'VERY', 'WANT', 'WEEK', 'WELL', 'WENT', 'WHAT',
-    'WHEN', 'WILL', 'WONT', 'YEAH', 'YEAR', 'YOUR', 'ZERO', 'ABOUT', 'ABOVE',
-    'AFTER', 'AGAIN', 'BEING', 'BELOW', 'COULD', 'EVERY', 'FIRST', 'FOUND',
-    'GREAT', 'HENCE', 'MIGHT', 'NEVER', 'OTHER', 'QUITE', 'RIGHT', 'SHALL',
-    'SINCE', 'STILL', 'THEIR', 'THERE', 'THESE', 'THING', 'THINK', 'THOSE',
-    'THREE', 'TODAY', 'UNDER', 'UNTIL', 'WHERE', 'WHICH', 'WHILE', 'WHOLE',
-    'WHOSE', 'WOULD', 'YOUNG', 'THE', 'THINKING', 'REALLY', 'THANKS',
-  ]);
-
-  while ((match = tickerRegex.exec(text)) !== null) {
-    const originalMatch = match[0];
-    const symbol = originalMatch.toUpperCase();
-    const key = `stock:${symbol}`;
-
-    // Skip if already found
-    if (seenSymbols.has(key)) continue;
-
-    // Skip common English words
-    if (skipWords.has(symbol)) continue;
-
-    // Skip single letters except known ones
-    if (symbol.length === 1 && !KNOWN_TICKERS.has(symbol)) continue;
-
-    // For lowercase/mixed case, only accept if it's a known ticker
-    const isAllCaps = originalMatch === symbol;
-    const isKnownTicker = KNOWN_TICKERS.has(symbol);
-
-    if (isKnownTicker || isAllCaps) {
-      seenSymbols.add(key);
-      assets.push({
-        type: 'stock',
-        symbol,
-        displaySymbol: symbol,
-        originalText: originalMatch,
-      });
     }
   }
 

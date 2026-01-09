@@ -135,10 +135,9 @@ export function AssetCard({ asset, compact = false, animationDelay = 0, isExitin
                 <span className={`text-fluid-xs font-medium px-2 py-0.5 rounded-full ${getTypeBadgeColor()}`}>
                   {getTypeLabel()}
                 </span>
-                <span className="text-gray-500 text-fluid-sm truncate">{asset.originalText}</span>
+                <span className="text-gray-400 text-fluid-sm font-medium">{asset.displaySymbol}</span>
               </div>
-              <h3 className="text-fluid-2xl font-bold text-white mt-1 truncate">{asset.displaySymbol}</h3>
-              {quote && <p className="text-fluid-sm text-gray-400 truncate">{quote.name}</p>}
+              <h3 className="text-fluid-2xl font-bold text-white mt-1 truncate">{quote?.name || asset.displaySymbol}</h3>
             </div>
 
             {quote && quote.price != null && (
@@ -243,16 +242,13 @@ export function AssetCard({ asset, compact = false, animationDelay = 0, isExitin
               >
                 {getTypeLabel()}
               </span>
-              <span className="text-gray-500 text-fluid-xs truncate">
-                {asset.originalText}
+              <span className="text-gray-400 text-fluid-xs font-medium">
+                {asset.displaySymbol}
               </span>
             </div>
-            <h3 className={`${compact ? 'text-fluid-sm' : 'text-fluid-lg'} font-semibold text-white mt-0.5`}>
-              {asset.displaySymbol}
+            <h3 className={`${compact ? 'text-fluid-sm' : 'text-fluid-lg'} font-semibold text-white mt-0.5 truncate`}>
+              {quote?.name || asset.displaySymbol}
             </h3>
-            {quote && !compact && (
-              <p className="text-fluid-xs text-gray-400 truncate">{quote.name}</p>
-            )}
           </div>
 
           {quote && quote.price != null && (
