@@ -28,6 +28,64 @@ const ECONOMIC_INDICATORS = new Set([
   'M2',
 ]);
 
+// Well-known tickers that should be recognized without cashtag
+// Excludes: single letters (V, T, F, C, K, M, W, Z, S, X, A)
+// Excludes: common words (NOW, ALL, KEY, RUN, FAST, WELL, WORK, OPEN, PATH, SNOW, COIN, DASH, TRIP, TEAM, RACE, SPOT, SNAP, PLUG, ARM, NET, CAT, LOW, ON, BE, IT, SO, ARE, ANY, CAN, HAS, HIM, HER, HIS, HE, WE, FOR, SEE)
+// Excludes: ambiguous short tickers (GM, HP, GE, BP, EA, AI, DD, CC, CO)
+const COMMON_TICKERS = new Set([
+  // Big Tech (mega caps)
+  'AAPL', 'MSFT', 'GOOGL', 'GOOG', 'AMZN', 'TSLA', 'NVDA', 'META', 'NFLX',
+  // Semiconductors
+  'INTC', 'AMD', 'QCOM', 'AVGO', 'ASML', 'TSM', 'SMCI', 'MRVL', 'AMAT', 'LRCX', 'KLAC', 'MCHP',
+  // Enterprise Software
+  'CRM', 'ADBE', 'ORCL', 'CSCO', 'IBM', 'SAP', 'WDAY', 'PLTR', 'MDB', 'HUBS', 'SHOP', 'DDOG',
+  // Cybersecurity
+  'CRWD', 'PANW', 'FTNT', 'OKTA', 'ZS',
+  // Fintech & Payments
+  'PYPL', 'SQ', 'HOOD', 'SOFI', 'UPST',
+  // Consumer Tech
+  'UBER', 'LYFT', 'ABNB', 'ETSY', 'EBAY', 'CHWY', 'CVNA', 'DUOL', 'ROKU',
+  // Gaming
+  'RBLX', 'ATVI', 'TTWO', 'DKNG', 'GME', 'AMC',
+  // EV & Auto
+  'NIO', 'RIVN', 'LCID', 'XPEV', 'CHPT',
+  // Aerospace
+  'BA', 'LMT', 'RTX', 'NOC', 'RKLB',
+  // Energy
+  'CVX', 'XOM', 'COP', 'SLB', 'HAL', 'OXY', 'DVN', 'EOG',
+  // Clean Energy
+  'FSLR', 'ENPH', 'SEDG',
+  // Pharma & Healthcare
+  'JNJ', 'PFE', 'MRNA', 'MRK', 'LLY', 'ABBV', 'AMGN', 'GILD', 'REGN', 'BIIB', 'BNTX', 'NVAX',
+  'BMY', 'AZN', 'NVS', 'NVO', 'VRTX', 'ILMN', 'DXCM', 'ISRG', 'BSX', 'MDT', 'ABT', 'TMO', 'DHR', 'SYK',
+  // Health Insurance
+  'UNH', 'ELV', 'HUM', 'CNC', 'CVS', 'WBA',
+  // Retail
+  'WMT', 'HD', 'TGT', 'DG', 'DLTR', 'ROST', 'TJX', 'ULTA', 'BBY',
+  // Food & Beverage
+  'SBUX', 'MCD', 'CMG', 'YUM', 'DPZ', 'KO', 'PEP', 'MNST',
+  // Consumer Goods
+  'PG', 'CL', 'KMB', 'CLX',
+  // Apparel
+  'NKE', 'LULU', 'UAA', 'CROX', 'ONON', 'DECK',
+  // Telecom
+  'VZ', 'TMUS', 'CMCSA', 'CHTR',
+  // Banks
+  'JPM', 'BAC', 'GS', 'MS', 'WFC', 'USB', 'PNC', 'TFC', 'SCHW',
+  // Asset Management & Insurance
+  'BLK', 'BX', 'KKR', 'APO', 'PGR', 'TRV', 'CB', 'AIG', 'PRU', 'AFL',
+  // Industrial
+  'DE', 'MMM', 'HON', 'UPS', 'FDX', 'UNP', 'CSX', 'NSC', 'EMR', 'ETN',
+  // REITs
+  'AMT', 'CCI', 'EQIX', 'DLR', 'PLD', 'PSA', 'SPG', 'VICI',
+  // ETFs
+  'SPY', 'QQQ', 'IWM', 'DIA', 'ARKK', 'ARKG', 'GLD', 'SLV', 'USO', 'VXX', 'TQQQ', 'SQQQ', 'VOO', 'VTI', 'XLF', 'XLE', 'XLK',
+  // Crypto-related stocks
+  'MARA', 'RIOT', 'CLSK', 'BITF', 'MSTR',
+  // Other notable
+  'BRK', 'BRKB', 'PARA', 'WBD', 'SONY', 'NTDOY', 'LYV',
+]);
+
 // Common company name to ticker mappings
 const COMPANY_NAMES: Record<string, string> = {
   // Big Tech
@@ -754,6 +812,25 @@ export function parseAssets(text: string): ParsedAsset[] {
         displaySymbol: symbol,
         originalText: match[0],
       });
+    }
+  }
+
+  // 1b. Parse well-known bare tickers (MSFT, NVDA, etc.) - only from whitelist
+  const bareTickerRegex = /\b([A-Z]{2,5})\b/g;
+  while ((match = bareTickerRegex.exec(text)) !== null) {
+    const symbol = match[1];
+    // Only accept if it's in our whitelist of common tickers
+    if (COMMON_TICKERS.has(symbol)) {
+      const key = `stock:${symbol}`;
+      if (!seenSymbols.has(key)) {
+        seenSymbols.add(key);
+        assets.push({
+          type: 'stock',
+          symbol,
+          displaySymbol: symbol,
+          originalText: match[0],
+        });
+      }
     }
   }
 
