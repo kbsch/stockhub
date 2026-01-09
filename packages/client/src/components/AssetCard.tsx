@@ -8,7 +8,6 @@ import { Chart } from './Chart';
 interface AssetCardProps {
   asset: ParsedAsset;
   compact?: boolean;
-  onStatus?: (symbol: string, status: 'success' | 'failed') => void;
   animationDelay?: number;
   isExiting?: boolean;
 }
@@ -16,9 +15,8 @@ interface AssetCardProps {
 const TIME_RANGES = ['1D', '1W', '1M', '3M', '1Y', '5Y'] as const;
 type TimeRange = (typeof TIME_RANGES)[number];
 
-export function AssetCard({ asset, compact = false, onStatus, animationDelay = 0, isExiting = false }: AssetCardProps) {
+export function AssetCard({ asset, compact = false, animationDelay = 0, isExiting = false }: AssetCardProps) {
   const [range, setRange] = useState<TimeRange>('3M');
-  const [reportedStatus, setReportedStatus] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
@@ -64,19 +62,6 @@ export function AssetCard({ asset, compact = false, onStatus, animationDelay = 0
       setHasLoadedOnce(true);
     }
   }, [hasSucceeded, hasLoadedOnce]);
-
-  // Report status when initial loading completes
-  useEffect(() => {
-    if (reportedStatus || isInitialLoading) return;
-
-    if (hasFailed && onStatus) {
-      onStatus(asset.symbol, 'failed');
-      setReportedStatus(true);
-    } else if (hasSucceeded && onStatus) {
-      onStatus(asset.symbol, 'success');
-      setReportedStatus(true);
-    }
-  }, [hasFailed, hasSucceeded, isInitialLoading, onStatus, asset.symbol, reportedStatus]);
 
   // Don't render during initial load or if failed - only show when data is ready
   if (isInitialLoading || (hasFailed && !hasLoadedOnce)) {

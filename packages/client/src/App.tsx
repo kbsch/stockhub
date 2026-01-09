@@ -1,16 +1,10 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { TextInput } from './components/TextInput';
 import { AssetGrid } from './components/AssetGrid';
-import { StatusTicker } from './components/StatusTicker';
 import { parseAssets, ParsedAsset } from './lib/parser';
 
 const MAX_ASSETS = 20;
 const EXIT_ANIMATION_DURATION = 300;
-
-export interface TickerStatus {
-  symbol: string;
-  status: 'success' | 'failed';
-}
 
 export interface DisplayAsset extends ParsedAsset {
   isExiting?: boolean;
@@ -18,7 +12,6 @@ export interface DisplayAsset extends ParsedAsset {
 
 function App() {
   const [assets, setAssets] = useState<DisplayAsset[]>([]);
-  const [tickerStatuses, setTickerStatuses] = useState<TickerStatus[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [truncated, setTruncated] = useState(false);
   const [inputText, setInputText] = useState('');
@@ -72,7 +65,6 @@ function App() {
         if (prev.length === 0) return prev;
         return markAssetsAsExiting(prev, new Set());
       });
-      setTickerStatuses([]);
       setError(null);
       setTruncated(false);
       return;
@@ -80,7 +72,6 @@ function App() {
 
     try {
       setError(null);
-      setTickerStatuses([]);
       let parsed = parseAssets(text);
 
       if (parsed.length > MAX_ASSETS) {
@@ -109,46 +100,17 @@ function App() {
     }
   }, [markAssetsAsExiting]);
 
-  const handleAssetStatus = useCallback((symbol: string, status: 'success' | 'failed') => {
-    setTickerStatuses(prev => {
-      if (prev.some(t => t.symbol === symbol)) return prev;
-      return [...prev, { symbol, status }];
-    });
-    if (status === 'failed') {
-      // Mark as exiting instead of immediate removal
-      setAssets(prev => {
-        const newAssetKeys = new Set(
-          prev
-            .filter(a => a.symbol !== symbol && a.metadata?.underlying !== symbol)
-            .map(getAssetKey)
-        );
-        return markAssetsAsExiting(prev, newAssetKeys);
-      });
-    }
-  }, [markAssetsAsExiting]);
-
   const handleClear = () => {
     setInputText('');
     setAssets([]);
-    setTickerStatuses([]);
     setError(null);
     setTruncated(false);
   };
 
   return (
-    <div className="min-h-screen bg-gray-950">
-      {/* Status ticker bar - fixed at top, behind sidebar */}
-      <div className="fixed top-0 left-0 right-0 z-0">
-        <StatusTicker
-          successSymbols={tickerStatuses.filter(s => s.status === 'success').map(s => s.symbol)}
-          failedSymbols={tickerStatuses.filter(s => s.status === 'failed').map(s => s.symbol)}
-        />
-      </div>
-
-      {/* Main layout with top padding for ticker */}
-      <div className="flex flex-col md:flex-row pt-10">
-        {/* Sidebar with text input - left side, overlays ticker */}
-        <aside className="w-full md:w-72 lg:w-80 xl:w-96 flex-shrink-0 border-b md:border-b-0 md:border-r border-gray-800 bg-gray-900 p-fluid-3 flex flex-col md:h-screen md:sticky md:top-0 md:-mt-10 md:pt-fluid-3 relative z-10">
+    <div className="min-h-screen bg-gray-950 flex flex-col md:flex-row">
+      {/* Sidebar with text input */}
+      <aside className="w-full md:w-72 lg:w-80 xl:w-96 flex-shrink-0 border-b md:border-b-0 md:border-r border-gray-800 bg-gray-900 p-fluid-3 flex flex-col md:h-screen md:sticky md:top-0">
         <div className="mb-fluid-3">
           <h1 className="text-fluid-xl font-bold text-white">
             Stock<span className="text-blue-500">Hub</span>
@@ -182,19 +144,18 @@ function App() {
         )}
       </aside>
 
-        {/* Main content area with charts */}
-        <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          <div className="flex-1 p-fluid-3 overflow-auto">
-            {assets.length > 0 ? (
-              <AssetGrid assets={assets} onAssetStatus={handleAssetStatus} />
-            ) : (
-              <div className="h-full flex items-center justify-center text-gray-600">
-                <p className="text-fluid-base">Charts will appear here</p>
-              </div>
-            )}
-          </div>
-        </main>
-      </div>
+      {/* Main content area with charts */}
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <div className="flex-1 p-fluid-3 overflow-auto">
+          {assets.length > 0 ? (
+            <AssetGrid assets={assets} />
+          ) : (
+            <div className="h-full flex items-center justify-center text-gray-600">
+              <p className="text-fluid-base">Charts will appear here</p>
+            </div>
+          )}
+        </div>
+      </main>
     </div>
   );
 }

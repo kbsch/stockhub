@@ -3,10 +3,9 @@ import { AssetCard } from './AssetCard';
 
 interface AssetGridProps {
   assets: DisplayAsset[];
-  onAssetStatus?: (symbol: string, status: 'success' | 'failed') => void;
 }
 
-export function AssetGrid({ assets, onAssetStatus }: AssetGridProps) {
+export function AssetGrid({ assets }: AssetGridProps) {
   return (
     <div
       className="grid gap-4 grid-cols-[repeat(auto-fill,minmax(320px,1fr))] [grid-template-rows:masonry] auto-rows-max"
@@ -16,7 +15,6 @@ export function AssetGrid({ assets, onAssetStatus }: AssetGridProps) {
           key={`${asset.type}-${asset.symbol}`}
           asset={asset}
           compact
-          onStatus={onAssetStatus}
           animationDelay={index * 50}
           isExiting={asset.isExiting}
         />
