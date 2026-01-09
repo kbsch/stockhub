@@ -10,6 +10,7 @@
     "dev:client": "npm run dev -w @stockhub/client",
     "dev:server": "npm run dev -w @stockhub/server",
     "build": "npm run build -w @stockhub/server && npm run build -w @stockhub/client",
+    "build:vercel": "cd packages/client && npm run build && cp -r dist ../../dist",
     "lint": "npm run lint --workspaces --if-present"
   },
   "devDependencies": {

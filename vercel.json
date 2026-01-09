@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run build -w @stockhub/client",
+  "buildCommand": "npm run build:vercel",
   "outputDirectory": "dist",
   "installCommand": "npm install"
 }
