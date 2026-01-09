@@ -116,33 +116,33 @@ export function AssetCard({ asset, compact = false, onStatus, animationDelay = 0
 
   // Expanded overlay - rendered via portal to avoid clipping issues
   const expandedOverlay = expanded ? createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4 md:p-8">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/70 animate-fade-in"
         onClick={() => setExpanded(false)}
       />
-      {/* Expanded card */}
-      <div className="relative w-[75vw] h-[75vh] bg-gray-900 rounded-xl border border-gray-700 overflow-hidden flex flex-col shadow-2xl animate-scale-in">
+      {/* Expanded card - full screen on mobile, constrained on larger screens */}
+      <div className="relative w-full h-full md:w-[85vw] md:h-[85vh] lg:w-[75vw] lg:h-[75vh] xl:max-w-6xl xl:max-h-[80vh] bg-gray-900 rounded-lg md:rounded-xl border border-gray-700 overflow-hidden flex flex-col shadow-2xl animate-scale-in">
         {/* Header */}
-        <div className="p-4 border-b border-gray-800 flex-shrink-0">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${getTypeBadgeColor()}`}>
+        <div className="p-fluid-3 border-b border-gray-800 flex-shrink-0">
+          <div className="flex items-start justify-between gap-2 sm:gap-4">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className={`text-fluid-xs font-medium px-2 py-0.5 rounded-full ${getTypeBadgeColor()}`}>
                   {getTypeLabel()}
                 </span>
-                <span className="text-gray-500 text-sm">{asset.originalText}</span>
+                <span className="text-gray-500 text-fluid-sm truncate">{asset.originalText}</span>
               </div>
-              <h3 className="text-2xl font-bold text-white mt-1">{asset.displaySymbol}</h3>
-              {quote && <p className="text-sm text-gray-400">{quote.name}</p>}
+              <h3 className="text-fluid-2xl font-bold text-white mt-1 truncate">{asset.displaySymbol}</h3>
+              {quote && <p className="text-fluid-sm text-gray-400 truncate">{quote.name}</p>}
             </div>
 
             {quote && quote.price != null && (
-              <div className="text-right">
-                <p className="text-2xl font-bold text-white">${quote.price.toFixed(2)}</p>
+              <div className="text-right flex-shrink-0">
+                <p className="text-fluid-xl sm:text-fluid-2xl font-bold text-white">${quote.price.toFixed(2)}</p>
                 {quote.change != null && quote.changePercent != null && (
-                  <p className={`text-sm font-medium ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
+                  <p className={`text-fluid-sm font-medium ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
                     {isPositive ? '+' : ''}{quote.change.toFixed(2)} ({isPositive ? '+' : ''}{quote.changePercent.toFixed(2)}%)
                   </p>
                 )}
@@ -151,9 +151,9 @@ export function AssetCard({ asset, compact = false, onStatus, animationDelay = 0
 
             <button
               onClick={() => setExpanded(false)}
-              className="text-gray-400 hover:text-white transition-colors p-1"
+              className="text-gray-400 hover:text-white transition-colors p-1 flex-shrink-0"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -161,7 +161,7 @@ export function AssetCard({ asset, compact = false, onStatus, animationDelay = 0
 
           {/* Option details */}
           {asset.type === 'option' && asset.metadata && (
-            <div className="flex items-center gap-4 mt-2 text-sm">
+            <div className="flex items-center gap-2 sm:gap-4 mt-2 text-fluid-sm flex-wrap">
               <span className="text-gray-400">
                 Strike: <span className="text-white">${asset.metadata.strike}</span>
               </span>
@@ -178,13 +178,13 @@ export function AssetCard({ asset, compact = false, onStatus, animationDelay = 0
         </div>
 
         {/* Time range selector */}
-        <div className="px-4 pt-3 flex-shrink-0">
-          <div className="flex items-center gap-1">
+        <div className="px-fluid-3 pt-fluid-2 flex-shrink-0">
+          <div className="flex items-center gap-1 overflow-x-auto">
             {TIME_RANGES.map((r) => (
               <button
                 key={r}
                 onClick={() => setRange(r)}
-                className={`px-3 py-1 text-sm font-medium rounded transition-colors ${
+                className={`px-2 sm:px-3 py-1 text-fluid-sm font-medium rounded transition-colors flex-shrink-0 ${
                   range === r
                     ? 'bg-blue-600 text-white'
                     : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800'
@@ -197,17 +197,17 @@ export function AssetCard({ asset, compact = false, onStatus, animationDelay = 0
         </div>
 
         {/* Chart area - fills remaining space */}
-        <div className="flex-1 p-4 min-h-0">
+        <div className="flex-1 p-fluid-3 min-h-0">
           <div className="w-full h-full bg-gray-800/50 rounded-lg overflow-hidden">
             {chartLoading ? (
               <div className="h-full flex items-center justify-center">
-                <div className="animate-pulse text-gray-500">Loading...</div>
+                <div className="animate-pulse text-gray-500 text-fluid-base">Loading...</div>
               </div>
             ) : chart?.data && chart.data.length > 0 ? (
               <Chart data={chart.data} isPositive={isPositive} />
             ) : (
               <div className="h-full flex items-center justify-center">
-                <span className="text-gray-500">No chart data</span>
+                <span className="text-gray-500 text-fluid-base">No chart data</span>
               </div>
             )}
           </div>
@@ -228,35 +228,35 @@ export function AssetCard({ asset, compact = false, onStatus, animationDelay = 0
         onClick={() => setExpanded(true)}
       >
       {/* Header */}
-      <div className={compact ? 'p-2.5' : 'p-4 border-b border-gray-800'}>
+      <div className={compact ? 'p-fluid-2' : 'p-fluid-3 border-b border-gray-800'}>
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
               <span
-                className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full whitespace-nowrap ${getTypeBadgeColor()}`}
+                className={`text-fluid-xs font-medium px-1.5 py-0.5 rounded-full whitespace-nowrap ${getTypeBadgeColor()}`}
               >
                 {getTypeLabel()}
               </span>
-              <span className="text-gray-500 text-[10px] truncate">
+              <span className="text-gray-500 text-fluid-xs truncate">
                 {asset.originalText}
               </span>
             </div>
-            <h3 className={`${compact ? 'text-sm' : 'text-lg'} font-semibold text-white mt-0.5`}>
+            <h3 className={`${compact ? 'text-fluid-sm' : 'text-fluid-lg'} font-semibold text-white mt-0.5`}>
               {asset.displaySymbol}
             </h3>
             {quote && !compact && (
-              <p className="text-xs text-gray-400 truncate">{quote.name}</p>
+              <p className="text-fluid-xs text-gray-400 truncate">{quote.name}</p>
             )}
           </div>
 
           {quote && quote.price != null && (
             <div className="text-right flex-shrink-0">
-              <p className={`${compact ? 'text-sm' : 'text-lg'} font-semibold text-white`}>
+              <p className={`${compact ? 'text-fluid-sm' : 'text-fluid-lg'} font-semibold text-white`}>
                 ${quote.price.toFixed(2)}
               </p>
               {quote.change != null && quote.changePercent != null && (
                 <p
-                  className={`${compact ? 'text-[10px]' : 'text-sm'} font-medium ${
+                  className={`${compact ? 'text-fluid-xs' : 'text-fluid-sm'} font-medium ${
                     isPositive ? 'text-green-400' : 'text-red-400'
                   }`}
                 >
@@ -269,7 +269,7 @@ export function AssetCard({ asset, compact = false, onStatus, animationDelay = 0
 
         {/* Option details - compact inline */}
         {asset.type === 'option' && asset.metadata && (
-          <div className={`flex items-center gap-2 ${compact ? 'mt-1' : 'mt-2'} text-[10px]`}>
+          <div className={`flex items-center gap-2 ${compact ? 'mt-1' : 'mt-2'} text-fluid-xs`}>
             <span className="text-gray-400">
               ${asset.metadata.strike}{' '}
               <span className={asset.metadata.callPut === 'call' ? 'text-green-400' : 'text-red-400'}>
@@ -282,13 +282,13 @@ export function AssetCard({ asset, compact = false, onStatus, animationDelay = 0
 
         {/* Bond details */}
         {asset.type === 'bond' && asset.metadata?.cusip && (
-          <p className="mt-1 text-[10px] text-gray-500">Bond lookup N/A</p>
+          <p className="mt-1 text-fluid-xs text-gray-500">Bond lookup N/A</p>
         )}
       </div>
 
       {/* Chart */}
       {asset.type !== 'bond' && (
-        <div className={compact ? 'px-2.5 pb-2.5' : 'p-4'}>
+        <div className={compact ? 'px-fluid-2 pb-fluid-2' : 'p-fluid-3'}>
           {/* Time range selector */}
           <div className="flex items-center gap-0.5 mb-1.5">
             {TIME_RANGES.map((r) => (
@@ -298,7 +298,7 @@ export function AssetCard({ asset, compact = false, onStatus, animationDelay = 0
                   e.stopPropagation();
                   setRange(r);
                 }}
-                className={`px-1.5 py-0.5 text-[10px] font-medium rounded transition-colors ${
+                className={`px-1.5 py-0.5 text-fluid-xs font-medium rounded transition-colors ${
                   range === r
                     ? 'bg-blue-600 text-white'
                     : 'text-gray-500 hover:text-gray-300 hover:bg-gray-800'
@@ -309,21 +309,21 @@ export function AssetCard({ asset, compact = false, onStatus, animationDelay = 0
             ))}
           </div>
 
-          {/* Chart area */}
-          <div className={`${compact ? 'h-44' : 'h-48'} bg-gray-800/50 rounded overflow-hidden`}>
+          {/* Chart area - responsive height */}
+          <div className={`${compact ? 'h-36 sm:h-40 md:h-44 lg:h-48' : 'h-40 sm:h-44 md:h-48 lg:h-52'} bg-gray-800/50 rounded overflow-hidden`}>
             {chartLoading ? (
               <div className="h-full flex items-center justify-center">
-                <div className="animate-pulse text-gray-500 text-xs">Loading...</div>
+                <div className="animate-pulse text-gray-500 text-fluid-xs">Loading...</div>
               </div>
             ) : chartError || quoteError ? (
               <div className="h-full flex items-center justify-center">
-                <span className="text-red-400 text-xs">Failed</span>
+                <span className="text-red-400 text-fluid-xs">Failed</span>
               </div>
             ) : chart?.data && chart.data.length > 0 ? (
               <Chart data={chart.data} isPositive={isPositive} />
             ) : (
               <div className="h-full flex items-center justify-center">
-                <span className="text-gray-500 text-xs">No data</span>
+                <span className="text-gray-500 text-fluid-xs">No data</span>
               </div>
             )}
           </div>

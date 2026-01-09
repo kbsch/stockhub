@@ -119,7 +119,7 @@ export function StatusTicker({ successSymbols = [], failedSymbols = [] }: Status
   return (
     <div
       ref={containerRef}
-      className="bg-gray-900 border-t border-gray-800 overflow-hidden flex-shrink-0"
+      className="bg-gray-900 border-b border-gray-800 overflow-hidden flex-shrink-0"
     >
       <div className="py-2">
         {allSymbols.length === 0 ? (

@@ -9,8 +9,7 @@ interface AssetGridProps {
 export function AssetGrid({ assets, onAssetStatus }: AssetGridProps) {
   return (
     <div
-      className="grid gap-3"
-      style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(308px, 384px))' }}
+      className="grid gap-4 grid-cols-[repeat(auto-fill,minmax(320px,1fr))] [grid-template-rows:masonry] auto-rows-max"
     >
       {assets.map((asset, index) => (
         <AssetCard

@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 
 interface TextInputProps {
+  value: string;
+  onChange: (text: string) => void;
   onSubmit: (text: string) => void;
 }
 
@@ -10,8 +12,7 @@ const TICKER_PATTERNS = [
   /\b[A-Z]{2,5}\b/g,      // Uppercase tickers
 ];
 
-export function TextInput({ onSubmit }: TextInputProps) {
-  const [text, setText] = useState('');
+export function TextInput({ value: text, onChange: setText, onSubmit }: TextInputProps) {
   const [highlightKey, setHighlightKey] = useState(0);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -99,11 +100,11 @@ export function TextInput({ onSubmit }: TextInputProps) {
 
   return (
     <div className="flex flex-col">
-      <div className="relative h-48 bg-gray-800 rounded-lg border border-gray-700 focus-within:ring-2 focus-within:ring-blue-500">
+      <div className="relative h-40 md:h-48 bg-gray-800 rounded-lg border border-gray-700 focus-within:ring-2 focus-within:ring-blue-500">
         {/* Highlight backdrop */}
         <div
           ref={highlightRef}
-          className="absolute inset-0 p-3 text-sm overflow-auto whitespace-pre-wrap break-words pointer-events-none text-transparent"
+          className="absolute inset-0 p-fluid-2 text-fluid-sm overflow-auto whitespace-pre-wrap break-words pointer-events-none text-transparent"
           style={{ wordBreak: 'break-word' }}
           dangerouslySetInnerHTML={{ __html: highlightedHtml }}
         />
@@ -117,10 +118,10 @@ export function TextInput({ onSubmit }: TextInputProps) {
 
 Example:
 I'm bullish on $AAPL and MSFT. Looking at AAPL 200C 3/21. DXY is wild."
-          className="absolute inset-0 w-full h-full bg-transparent text-gray-100 placeholder-gray-500 p-3 resize-none focus:outline-none text-sm caret-white"
+          className="absolute inset-0 w-full h-full bg-transparent text-gray-100 placeholder-gray-500 p-fluid-2 resize-none focus:outline-none text-fluid-sm caret-white"
         />
       </div>
-      <p className="text-xs text-gray-500 mt-2">
+      <p className="text-fluid-xs text-gray-500 mt-2">
         $AAPL, company names, options, CUSIPs, DXY, VIX
       </p>
     </div>
