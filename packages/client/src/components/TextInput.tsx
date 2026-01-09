@@ -14,9 +14,25 @@ const TICKER_PATTERNS = [
 
 export function TextInput({ value: text, onChange: setText, onSubmit }: TextInputProps) {
   const [highlightKey, setHighlightKey] = useState(0);
+  const [height, setHeight] = useState('40vh');
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const highlightRef = useRef<HTMLDivElement>(null);
+  const measureRef = useRef<HTMLDivElement>(null);
+
+  // Dynamically adjust height based on content
+  useEffect(() => {
+    if (!measureRef.current) return;
+
+    const minHeight = window.innerHeight * 0.4; // 40vh
+    const maxHeight = window.innerHeight * 0.6; // 60vh
+
+    // Measure using hidden auto-height div
+    const contentHeight = measureRef.current.scrollHeight;
+
+    const newHeight = Math.max(minHeight, Math.min(contentHeight, maxHeight));
+    setHeight(`${newHeight}px`);
+  }, [text]);
 
   useEffect(() => {
     // Clear any pending debounce
@@ -100,7 +116,17 @@ export function TextInput({ value: text, onChange: setText, onSubmit }: TextInpu
 
   return (
     <div className="flex flex-col">
-      <div className="relative h-40 md:h-48 bg-gray-800 rounded-lg border border-gray-700 focus-within:ring-2 focus-within:ring-blue-500">
+      {/* Hidden measuring div - same styling but auto height */}
+      <div
+        ref={measureRef}
+        className="absolute -left-[9999px] w-72 lg:w-80 xl:w-96 p-fluid-2 text-fluid-sm whitespace-pre-wrap break-words"
+        style={{ wordBreak: 'break-word' }}
+        dangerouslySetInnerHTML={{ __html: highlightedHtml }}
+      />
+      <div
+        className="relative min-h-40 bg-gray-800 rounded-lg border border-gray-700 focus-within:ring-2 focus-within:ring-blue-500 transition-[height] duration-150"
+        style={{ height }}
+      >
         {/* Highlight backdrop */}
         <div
           ref={highlightRef}
