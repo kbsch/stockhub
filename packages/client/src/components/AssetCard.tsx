@@ -1,24 +1,29 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ParsedAsset } from '../lib/parser';
 import { fetchQuote, fetchChart, QuoteData, ChartData } from '../lib/api';
 import { Chart } from './Chart';
+import { SymbolStatus } from '../App';
 
 interface AssetCardProps {
   asset: ParsedAsset;
   compact?: boolean;
   animationDelay?: number;
   isExiting?: boolean;
+  onStatus?: (symbol: string, status: SymbolStatus) => void;
+  isHighlighted?: boolean;
+  assetKey?: string;
 }
 
 const TIME_RANGES = ['1D', '1W', '1M', '3M', '1Y', '5Y'] as const;
 type TimeRange = (typeof TIME_RANGES)[number];
 
-export function AssetCard({ asset, compact = false, animationDelay = 0, isExiting = false }: AssetCardProps) {
+export function AssetCard({ asset, compact = false, animationDelay = 0, isExiting = false, onStatus, isHighlighted = false, assetKey }: AssetCardProps) {
   const [range, setRange] = useState<TimeRange>('3M');
   const [expanded, setExpanded] = useState(false);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+  const reportedRef = useRef(false);
 
   // Close expanded view on Escape key
   useEffect(() => {
@@ -62,6 +67,19 @@ export function AssetCard({ asset, compact = false, animationDelay = 0, isExitin
       setHasLoadedOnce(true);
     }
   }, [hasSucceeded, hasLoadedOnce]);
+
+  // Report status when initial loading completes
+  useEffect(() => {
+    if (reportedRef.current || isInitialLoading) return;
+
+    if (hasFailed && onStatus) {
+      onStatus(asset.symbol, 'failed');
+      reportedRef.current = true;
+    } else if (hasSucceeded && onStatus) {
+      onStatus(asset.symbol, 'success');
+      reportedRef.current = true;
+    }
+  }, [hasFailed, hasSucceeded, isInitialLoading, onStatus, asset.symbol]);
 
   // Don't render during initial load or if failed - only show when data is ready
   if (isInitialLoading || (hasFailed && !hasLoadedOnce)) {
@@ -202,14 +220,17 @@ export function AssetCard({ asset, compact = false, animationDelay = 0, isExitin
     document.body
   ) : null;
 
+  const highlightGlow = isHighlighted ? 'shadow-[0_0_12px_rgba(59,130,246,0.5)] border-blue-500' : '';
+
   return (
     <div
+      id={assetKey ? `asset-card-${assetKey}` : undefined}
       className={isExiting ? 'animate-fan-out' : 'animate-fan-in'}
       style={{ animationDelay: isExiting ? '0ms' : `${animationDelay}ms` }}
     >
       {expandedOverlay}
       <div
-        className="bg-gray-900 rounded-lg border border-gray-800 overflow-hidden transition-all duration-200 hover:border-gray-600 hover:scale-[1.02] hover:shadow-lg hover:shadow-blue-500/10 cursor-pointer"
+        className={`bg-gray-900 rounded-lg border border-gray-800 overflow-hidden transition-all duration-200 hover:border-gray-600 hover:scale-[1.02] hover:shadow-lg hover:shadow-blue-500/10 cursor-pointer ${highlightGlow}`}
         onClick={() => setExpanded(true)}
       >
       {/* Header */}

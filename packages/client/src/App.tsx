@@ -10,17 +10,23 @@ export interface DisplayAsset extends ParsedAsset {
   isExiting?: boolean;
 }
 
+export type SymbolStatus = 'success' | 'failed';
+
 function App() {
   const [assets, setAssets] = useState<DisplayAsset[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [truncated, setTruncated] = useState(false);
   const [inputText, setInputText] = useState('');
+  const [symbolStatuses, setSymbolStatuses] = useState<Record<string, SymbolStatus>>({});
+  const [highlightedAsset, setHighlightedAsset] = useState<string | null>(null);
   const exitTimeoutsRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  const highlightTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Cleanup timeouts on unmount
   useEffect(() => {
     return () => {
       exitTimeoutsRef.current.forEach(timeout => clearTimeout(timeout));
+      if (highlightTimeoutRef.current) clearTimeout(highlightTimeoutRef.current);
     };
   }, []);
 
@@ -100,11 +106,41 @@ function App() {
     }
   }, [markAssetsAsExiting]);
 
+  const handleSymbolStatus = useCallback((symbol: string, status: SymbolStatus) => {
+    setSymbolStatuses(prev => {
+      if (prev[symbol] === status) return prev;
+      return { ...prev, [symbol]: status };
+    });
+  }, []);
+
   const handleClear = () => {
     setInputText('');
     setAssets([]);
+    setSymbolStatuses({});
+    setHighlightedAsset(null);
     setError(null);
     setTruncated(false);
+  };
+
+  const handleBubbleClick = (assetKey: string) => {
+    // Clear any existing highlight timeout
+    if (highlightTimeoutRef.current) {
+      clearTimeout(highlightTimeoutRef.current);
+    }
+
+    // Set the highlighted asset
+    setHighlightedAsset(assetKey);
+
+    // Scroll to the chart
+    const element = document.getElementById(`asset-card-${assetKey}`);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    // Clear highlight after 2 seconds
+    highlightTimeoutRef.current = setTimeout(() => {
+      setHighlightedAsset(null);
+    }, 2000);
   };
 
   return (
@@ -129,18 +165,50 @@ function App() {
         )}
 
         {assets.length > 0 && (
-          <div className="mt-fluid-3 flex items-center justify-between">
-            <span className="text-fluid-sm text-gray-400">
-              {assets.length} asset{assets.length !== 1 ? 's' : ''}
-              {truncated && <span className="text-amber-400"> (limited)</span>}
-            </span>
-            <button
-              onClick={handleClear}
-              className="text-fluid-xs text-gray-500 hover:text-gray-300 transition-colors"
-            >
-              Clear
-            </button>
-          </div>
+          <>
+            <div className="mt-fluid-3 flex items-center justify-between">
+              <span className="text-fluid-sm text-gray-400">
+                {assets.length} asset{assets.length !== 1 ? 's' : ''}
+                {truncated && <span className="text-amber-400"> (limited)</span>}
+              </span>
+              <button
+                onClick={handleClear}
+                className="px-3 py-1 text-fluid-xs font-medium text-gray-300 bg-gray-700 hover:bg-gray-600 rounded-md transition-colors"
+              >
+                Clear
+              </button>
+            </div>
+
+            {/* Ticker status bubbles */}
+            <div className="mt-fluid-2 flex flex-wrap gap-1.5">
+              {assets.filter(a => !a.isExiting).map(asset => {
+                const assetKey = getAssetKey(asset);
+                const status = symbolStatuses[asset.symbol];
+                const isHighlighted = highlightedAsset === assetKey;
+                const borderColor = status === 'success'
+                  ? 'border-green-500'
+                  : status === 'failed'
+                    ? 'border-red-500'
+                    : 'border-gray-600';
+                const glowClass = isHighlighted
+                  ? status === 'success'
+                    ? 'shadow-[0_0_8px_rgba(34,197,94,0.6)]'
+                    : status === 'failed'
+                      ? 'shadow-[0_0_8px_rgba(239,68,68,0.6)]'
+                      : 'shadow-[0_0_8px_rgba(59,130,246,0.6)]'
+                  : '';
+                return (
+                  <button
+                    key={assetKey}
+                    onClick={() => handleBubbleClick(assetKey)}
+                    className={`px-2 py-0.5 text-fluid-xs rounded-full border ${borderColor} text-gray-300 bg-gray-800/50 hover:bg-gray-700/50 transition-all cursor-pointer ${glowClass}`}
+                  >
+                    {asset.displaySymbol}
+                  </button>
+                );
+              })}
+            </div>
+          </>
         )}
       </aside>
 
@@ -148,7 +216,7 @@ function App() {
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <div className="flex-1 p-fluid-3 overflow-auto">
           {assets.length > 0 ? (
-            <AssetGrid assets={assets} />
+            <AssetGrid assets={assets} onSymbolStatus={handleSymbolStatus} highlightedAsset={highlightedAsset} />
           ) : (
             <div className="h-full flex items-center justify-center text-gray-600">
               <p className="text-fluid-base">Charts will appear here</p>
