@@ -7,7 +7,7 @@ interface ChartProps {
   isPositive: boolean;
 }
 
-export function Chart({ data, isPositive }: ChartProps) {
+export function Chart({ data, isPositive: _isPositive }: ChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
