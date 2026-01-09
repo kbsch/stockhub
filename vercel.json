@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "buildCommand": "pwd && ls -la && cd packages/client && npm run build && cp -r dist ../../dist",
+  "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "installCommand": "npm install",
+  "installCommand": "cd ../.. && npm install",
   "framework": null
 }
