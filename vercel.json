@@ -1,5 +1,5 @@
 {
   "buildCommand": "npm run build -w @stockhub/client",
-  "outputDirectory": "packages/client/dist",
+  "outputDirectory": "dist",
   "installCommand": "npm install"
 }
