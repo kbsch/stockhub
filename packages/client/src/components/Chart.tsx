@@ -1,16 +1,36 @@
 import { useEffect, useRef } from 'react';
 import { createChart, IChartApi, ISeriesApi, CandlestickData, Time } from 'lightweight-charts';
 import { ChartPoint } from '../lib/api';
+import { useTheme } from '../hooks/useTheme';
 
 interface ChartProps {
   data: ChartPoint[];
   isPositive: boolean;
 }
 
+const lightTheme = {
+  textColor: '#6b7280',
+  gridColor: '#e5e7eb',
+  crosshairColor: '#9ca3af',
+  labelBackgroundColor: '#f3f4f6',
+  borderColor: '#e5e7eb',
+};
+
+const darkTheme = {
+  textColor: '#9ca3af',
+  gridColor: '#1f2937',
+  crosshairColor: '#6b7280',
+  labelBackgroundColor: '#374151',
+  borderColor: '#374151',
+};
+
 export function Chart({ data, isPositive: _isPositive }: ChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
+  const { theme } = useTheme();
+
+  const colors = theme === 'dark' ? darkTheme : lightTheme;
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -19,32 +39,32 @@ export function Chart({ data, isPositive: _isPositive }: ChartProps) {
     const chart = createChart(containerRef.current, {
       layout: {
         background: { color: 'transparent' },
-        textColor: '#9ca3af',
+        textColor: colors.textColor,
       },
       grid: {
-        vertLines: { color: '#1f2937' },
-        horzLines: { color: '#1f2937' },
+        vertLines: { color: colors.gridColor },
+        horzLines: { color: colors.gridColor },
       },
       crosshair: {
         mode: 1,
         vertLine: {
-          color: '#6b7280',
+          color: colors.crosshairColor,
           width: 1,
           style: 2,
-          labelBackgroundColor: '#374151',
+          labelBackgroundColor: colors.labelBackgroundColor,
         },
         horzLine: {
-          color: '#6b7280',
+          color: colors.crosshairColor,
           width: 1,
           style: 2,
-          labelBackgroundColor: '#374151',
+          labelBackgroundColor: colors.labelBackgroundColor,
         },
       },
       rightPriceScale: {
-        borderColor: '#374151',
+        borderColor: colors.borderColor,
       },
       timeScale: {
-        borderColor: '#374151',
+        borderColor: colors.borderColor,
         timeVisible: true,
         secondsVisible: false,
       },
@@ -89,9 +109,9 @@ export function Chart({ data, isPositive: _isPositive }: ChartProps) {
       resizeObserver.disconnect();
       chart.remove();
     };
-  }, []);
+  }, [theme, colors.textColor, colors.gridColor, colors.crosshairColor, colors.labelBackgroundColor, colors.borderColor]);
 
-  // Update data when it changes
+  // Update data when it changes or chart is recreated
   useEffect(() => {
     if (!seriesRef.current || !data.length) return;
 
@@ -109,7 +129,7 @@ export function Chart({ data, isPositive: _isPositive }: ChartProps) {
     if (chartRef.current) {
       chartRef.current.timeScale().fitContent();
     }
-  }, [data]);
+  }, [data, theme]);
 
   return <div ref={containerRef} className="w-full h-full" />;
 }
