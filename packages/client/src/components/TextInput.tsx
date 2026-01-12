@@ -58,7 +58,7 @@ export function TextInput({ value: text, onChange: setText, onSubmit }: TextInpu
 
 Example:
 I'm bullish on $AAPL and MSFT. Looking at AAPL 200C 3/21. DXY is wild."
-        className="min-h-40 bg-gray-800 rounded-lg border border-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-100 placeholder-gray-500 p-fluid-2 resize-none text-fluid-sm transition-[height] duration-150"
+        className="min-h-40 bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 p-fluid-2 resize-none text-fluid-sm transition-[height] duration-150"
         style={{ height }}
       />
       <p className="text-fluid-xs text-gray-500 mt-2">

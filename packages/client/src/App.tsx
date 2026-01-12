@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { TextInput } from './components/TextInput';
 import { AssetGrid } from './components/AssetGrid';
+import { ThemeToggle } from './components/ThemeToggle';
 import { parseAssets, ParsedAsset } from './lib/parser';
 
 const MAX_ASSETS = 20;
@@ -144,36 +145,39 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-950 flex flex-col md:flex-row">
       {/* Sidebar with text input */}
-      <aside className="w-full md:w-72 lg:w-80 xl:w-96 flex-shrink-0 border-b md:border-b-0 md:border-r border-gray-800 bg-gray-900 p-fluid-3 flex flex-col md:h-screen md:sticky md:top-0">
-        <div className="mb-fluid-3">
-          <h1 className="text-fluid-xl font-bold text-white">
-            Stock<span className="text-blue-500">Hub</span>
-          </h1>
-          <p className="text-fluid-xs text-gray-400 mt-1">
-            Paste text to extract assets
-          </p>
+      <aside className="w-full md:w-72 lg:w-80 xl:w-96 flex-shrink-0 border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-fluid-3 flex flex-col md:h-screen md:sticky md:top-0">
+        <div className="mb-fluid-3 flex items-center justify-between">
+          <div>
+            <h1 className="text-fluid-xl font-bold text-gray-900 dark:text-white">
+              Stock<span className="text-blue-500">Hub</span>
+            </h1>
+            <p className="text-fluid-xs text-gray-500 dark:text-gray-400 mt-1">
+              Paste text to extract assets
+            </p>
+          </div>
+          <ThemeToggle />
         </div>
 
         <TextInput value={inputText} onChange={setInputText} onSubmit={handleTextChange} />
 
         {error && (
-          <div className="mt-fluid-3 p-fluid-2 bg-red-900/20 border border-red-800 rounded-lg">
-            <p className="text-red-400 text-fluid-xs">{error}</p>
+          <div className="mt-fluid-3 p-fluid-2 bg-red-100 dark:bg-red-900/20 border border-red-300 dark:border-red-800 rounded-lg">
+            <p className="text-red-600 dark:text-red-400 text-fluid-xs">{error}</p>
           </div>
         )}
 
         {assets.length > 0 && (
           <>
             <div className="mt-fluid-3 flex items-center justify-between">
-              <span className="text-fluid-sm text-gray-400">
+              <span className="text-fluid-sm text-gray-500 dark:text-gray-400">
                 {assets.length} asset{assets.length !== 1 ? 's' : ''}
-                {truncated && <span className="text-amber-400"> (limited)</span>}
+                {truncated && <span className="text-amber-500 dark:text-amber-400"> (limited)</span>}
               </span>
               <button
                 onClick={handleClear}
-                className="px-3 py-1 text-fluid-xs font-medium text-gray-300 bg-gray-700 hover:bg-gray-600 rounded-md transition-colors"
+                className="px-3 py-1 text-fluid-xs font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-md transition-colors"
               >
                 Clear
               </button>
@@ -189,7 +193,7 @@ function App() {
                   ? 'border-green-500'
                   : status === 'failed'
                     ? 'border-red-500'
-                    : 'border-gray-600';
+                    : 'border-gray-300 dark:border-gray-600';
                 const glowClass = isHighlighted
                   ? status === 'success'
                     ? 'shadow-[0_0_8px_rgba(34,197,94,0.6)]'
@@ -201,7 +205,7 @@ function App() {
                   <button
                     key={assetKey}
                     onClick={() => handleBubbleClick(assetKey)}
-                    className={`px-2 py-0.5 text-fluid-xs rounded-full border ${borderColor} text-gray-300 bg-gray-800/50 hover:bg-gray-700/50 transition-all cursor-pointer ${glowClass}`}
+                    className={`px-2 py-0.5 text-fluid-xs rounded-full border ${borderColor} text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800/50 hover:bg-gray-200 dark:hover:bg-gray-700/50 transition-all cursor-pointer ${glowClass}`}
                   >
                     {asset.displaySymbol}
                   </button>
@@ -218,7 +222,7 @@ function App() {
           {assets.length > 0 ? (
             <AssetGrid assets={assets} onSymbolStatus={handleSymbolStatus} highlightedAsset={highlightedAsset} />
           ) : (
-            <div className="h-full flex items-center justify-center text-gray-600">
+            <div className="h-full flex items-center justify-center text-gray-400 dark:text-gray-600">
               <p className="text-fluid-base">Charts will appear here</p>
             </div>
           )}
