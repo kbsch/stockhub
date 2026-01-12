@@ -29,62 +29,90 @@ const ECONOMIC_INDICATORS = new Set([
 ]);
 
 // Well-known tickers that should be recognized without cashtag
-// Excludes: single letters (V, T, F, C, K, M, W, Z, S, X, A)
-// Excludes: common words (NOW, ALL, KEY, RUN, FAST, WELL, WORK, OPEN, PATH, SNOW, COIN, DASH, TRIP, TEAM, RACE, SPOT, SNAP, PLUG, ARM, NET, CAT, LOW, ON, BE, IT, SO, ARE, ANY, CAN, HAS, HIM, HER, HIS, HE, WE, FOR, SEE)
-// Excludes: ambiguous short tickers (GM, HP, GE, BP, EA, AI, DD, CC, CO)
 const COMMON_TICKERS = new Set([
   // Big Tech (mega caps)
   'AAPL', 'MSFT', 'GOOGL', 'GOOG', 'AMZN', 'TSLA', 'NVDA', 'META', 'NFLX',
   // Semiconductors
-  'INTC', 'AMD', 'QCOM', 'AVGO', 'ASML', 'TSM', 'SMCI', 'MRVL', 'AMAT', 'LRCX', 'KLAC', 'MCHP',
+  'INTC', 'AMD', 'QCOM', 'AVGO', 'ASML', 'TSM', 'SMCI', 'MRVL', 'AMAT', 'LRCX', 'KLAC', 'MCHP', 'MU', 'TXN', 'SWKS', 'LSCC', 'WOLF',
   // Enterprise Software
-  'CRM', 'ADBE', 'ORCL', 'CSCO', 'IBM', 'SAP', 'WDAY', 'PLTR', 'MDB', 'HUBS', 'SHOP', 'DDOG',
+  'CRM', 'ADBE', 'ORCL', 'CSCO', 'IBM', 'SAP', 'WDAY', 'PLTR', 'MDB', 'HUBS', 'SHOP', 'DDOG', 'NOW', 'SNOW', 'TEAM', 'ZEN', 'SQSP', 'WIX', 'DBX', 'PATH', 'CFLT', 'HCP', 'GTLB', 'DOCN', 'FSLY', 'DT', 'NEWR', 'APPN', 'VEEV', 'ASAN', 'SMAR',
   // Cybersecurity
-  'CRWD', 'PANW', 'FTNT', 'OKTA', 'ZS',
+  'CRWD', 'PANW', 'FTNT', 'OKTA', 'ZS', 'NET', 'CYBR', 'QLYS', 'TENB', 'VRNS',
+  // Communication
+  'ZM', 'DOCU', 'TWLO', 'RNG',
   // Fintech & Payments
-  'PYPL', 'SQ', 'HOOD', 'SOFI', 'UPST',
+  'PYPL', 'SQ', 'HOOD', 'SOFI', 'UPST', 'COIN', 'LMND', 'MQ', 'BILL', 'NU',
   // Consumer Tech
-  'UBER', 'LYFT', 'ABNB', 'ETSY', 'EBAY', 'CHWY', 'CVNA', 'DUOL', 'ROKU',
+  'UBER', 'LYFT', 'ABNB', 'ETSY', 'EBAY', 'CHWY', 'CVNA', 'DUOL', 'ROKU', 'SPOT', 'DASH', 'CART', 'PINS', 'SNAP', 'RDDT', 'BMBL', 'MTCH', 'RDFN', 'YELP', 'TRIP', 'EXPE', 'COUR', 'CHGG',
   // Gaming
-  'RBLX', 'ATVI', 'TTWO', 'DKNG', 'GME', 'AMC',
+  'RBLX', 'ATVI', 'TTWO', 'DKNG', 'GME', 'AMC', 'EA', 'PTON',
+  // Media & Entertainment
+  'DIS', 'WBD', 'PARA', 'FOX', 'NYT', 'SONY', 'NTDOY', 'LYV', 'FUBO', 'IMAX', 'WMG',
   // EV & Auto
-  'NIO', 'RIVN', 'LCID', 'XPEV', 'CHPT',
+  'NIO', 'RIVN', 'LCID', 'XPEV', 'CHPT', 'FSR', 'F', 'GM', 'TM', 'HMC', 'RACE', 'STLA', 'PSNY', 'VFS', 'LI', 'QS', 'EVGO', 'BLNK',
   // Aerospace
-  'BA', 'LMT', 'RTX', 'NOC', 'RKLB',
+  'BA', 'LMT', 'RTX', 'NOC', 'RKLB', 'GD', 'LHX', 'TXT', 'SPCE',
   // Energy
-  'CVX', 'XOM', 'COP', 'SLB', 'HAL', 'OXY', 'DVN', 'EOG',
+  'CVX', 'XOM', 'COP', 'SLB', 'HAL', 'OXY', 'DVN', 'EOG', 'BP', 'BKR', 'PSX', 'VLO', 'MPC', 'PXD', 'FANG', 'CTRA', 'CHK',
   // Clean Energy
-  'FSLR', 'ENPH', 'SEDG',
+  'FSLR', 'ENPH', 'SEDG', 'RUN', 'SPWR', 'PLUG', 'BE', 'FCEL', 'NEE', 'BEPC',
   // Pharma & Healthcare
   'JNJ', 'PFE', 'MRNA', 'MRK', 'LLY', 'ABBV', 'AMGN', 'GILD', 'REGN', 'BIIB', 'BNTX', 'NVAX',
   'BMY', 'AZN', 'NVS', 'NVO', 'VRTX', 'ILMN', 'DXCM', 'ISRG', 'BSX', 'MDT', 'ABT', 'TMO', 'DHR', 'SYK',
+  'GSK', 'SNY', 'BDX', 'EW', 'IDXX', 'ZTS', 'ALGN', 'HOLX', 'EXAS',
   // Health Insurance
-  'UNH', 'ELV', 'HUM', 'CNC', 'CVS', 'WBA',
+  'UNH', 'ELV', 'HUM', 'CNC', 'CVS', 'WBA', 'CI', 'MOH',
   // Retail
-  'WMT', 'HD', 'TGT', 'DG', 'DLTR', 'ROST', 'TJX', 'ULTA', 'BBY',
+  'WMT', 'HD', 'TGT', 'DG', 'DLTR', 'ROST', 'TJX', 'ULTA', 'BBY', 'COST', 'LOW', 'BURL', 'FIVE', 'BBWI', 'JWN', 'KSS', 'WSM', 'RH', 'AZO', 'ORLY', 'AAP', 'KMX', 'FND', 'TSCO',
   // Food & Beverage
-  'SBUX', 'MCD', 'CMG', 'YUM', 'DPZ', 'KO', 'PEP', 'MNST',
+  'SBUX', 'MCD', 'CMG', 'YUM', 'DPZ', 'KO', 'PEP', 'MNST', 'DRI', 'STZ', 'BUD', 'TAP', 'SAM', 'KHC', 'GIS', 'HSY', 'MDLZ', 'CPB', 'SJM', 'TSN', 'HRL', 'BYND', 'SG', 'SHAK', 'WING', 'PZZA', 'BROS',
   // Consumer Goods
-  'PG', 'CL', 'KMB', 'CLX',
+  'PG', 'CL', 'KMB', 'CLX', 'UL', 'EL', 'CHD',
   // Apparel
-  'NKE', 'LULU', 'UAA', 'CROX', 'ONON', 'DECK',
+  'NKE', 'LULU', 'UAA', 'CROX', 'ONON', 'DECK', 'RL', 'TPR', 'PVH', 'VFC', 'CPRI', 'SKX',
   // Telecom
-  'VZ', 'TMUS', 'CMCSA', 'CHTR',
+  'T', 'VZ', 'TMUS', 'CMCSA', 'CHTR', 'DISH', 'LUMN',
   // Banks
-  'JPM', 'BAC', 'GS', 'MS', 'WFC', 'USB', 'PNC', 'TFC', 'SCHW',
+  'JPM', 'BAC', 'GS', 'MS', 'WFC', 'USB', 'PNC', 'TFC', 'SCHW', 'C', 'FITB', 'RF', 'KEY', 'HBAN', 'CFG', 'ALLY', 'SYF', 'STT', 'NTRS', 'BK',
   // Asset Management & Insurance
-  'BLK', 'BX', 'KKR', 'APO', 'PGR', 'TRV', 'CB', 'AIG', 'PRU', 'AFL',
+  'BLK', 'BX', 'KKR', 'APO', 'PGR', 'TRV', 'CB', 'AIG', 'PRU', 'AFL', 'V', 'MA', 'AXP', 'COF', 'DFS', 'TROW', 'BEN', 'IVZ', 'CG', 'ARES', 'ALL', 'MET', 'HIG', 'LNC', 'PFG', 'MMC', 'AON', 'WTW', 'AJG',
   // Industrial
-  'DE', 'MMM', 'HON', 'UPS', 'FDX', 'UNP', 'CSX', 'NSC', 'EMR', 'ETN',
+  'DE', 'MMM', 'HON', 'UPS', 'FDX', 'UNP', 'CSX', 'NSC', 'EMR', 'ETN', 'CAT', 'GE', 'CNI', 'CP', 'ROK', 'PH', 'ITW', 'JCI', 'TT', 'CARR', 'OTIS', 'SWK', 'SNA', 'FAST', 'GWW', 'XYL', 'DOV', 'FBIN', 'MAS', 'LEG', 'CTAS', 'WM', 'RSG',
   // REITs
-  'AMT', 'CCI', 'EQIX', 'DLR', 'PLD', 'PSA', 'SPG', 'VICI',
+  'AMT', 'CCI', 'EQIX', 'DLR', 'PLD', 'PSA', 'SPG', 'VICI', 'EXR', 'O', 'WELL', 'VTR', 'AVB', 'EQR', 'ESS', 'CPT', 'INVH', 'AMH', 'CBRE', 'JLL',
   // ETFs
-  'SPY', 'QQQ', 'IWM', 'DIA', 'ARKK', 'ARKG', 'GLD', 'SLV', 'USO', 'VXX', 'TQQQ', 'SQQQ', 'VOO', 'VTI', 'XLF', 'XLE', 'XLK',
+  'SPY', 'QQQ', 'IWM', 'DIA', 'ARKK', 'ARKG', 'GLD', 'SLV', 'USO', 'VXX', 'TQQQ', 'SQQQ', 'VOO', 'VTI', 'XLF', 'XLE', 'XLK', 'XLV', 'XLI', 'XLY', 'XLP', 'XLB', 'XLU', 'XLRE', 'SMH', 'SOXX', 'KWEB', 'EEM', 'EFA', 'HYG', 'LQD', 'TLT', 'SHY', 'AGG', 'BND', 'JETS', 'XBI', 'IBB', 'HACK', 'BOTZ', 'ICLN', 'TAN', 'ARKW', 'ARKF', 'ARKQ',
   // Crypto-related stocks
-  'MARA', 'RIOT', 'CLSK', 'BITF', 'MSTR',
+  'MARA', 'RIOT', 'CLSK', 'BITF', 'MSTR', 'HUT', 'CORZ',
+  // Hardware
+  'DELL', 'HPQ', 'WDC', 'STX', 'NTAP', 'PSTG', 'LOGI', 'CRSR',
   // Other notable
-  'BRK', 'BRKB', 'PARA', 'WBD', 'SONY', 'NTDOY', 'LYV',
+  'BRK', 'BRKB', 'ARM',
 ]);
+
+// Common English words that look like tickers but should be excluded
+const ENGLISH_WORD_BLACKLIST = new Set([
+  // Common 2-letter words
+  'AI', 'AM', 'AN', 'AS', 'AT', 'BE', 'BY', 'DO', 'GO', 'HE', 'IF', 'IN', 'IS', 'IT', 'ME', 'MY', 'NO', 'OF', 'OK', 'ON', 'OR', 'SO', 'TO', 'UP', 'US', 'WE',
+  // Common 3-letter words
+  'ACE', 'ACT', 'ADD', 'AGE', 'AGO', 'AID', 'AIM', 'AIR', 'AND', 'ANY', 'APT', 'ARC', 'ARE', 'ART', 'ASK', 'ATE', 'BAD', 'BAG', 'BAN', 'BAR', 'BAT', 'BED', 'BET', 'BIG', 'BIT', 'BOX', 'BOY', 'BUS', 'BUT', 'BUY', 'CAN', 'CAR', 'CUT', 'DAD', 'DAY', 'DID', 'DIE', 'DOG', 'DUE', 'EAR', 'EAT', 'END', 'ERA', 'ETC', 'EVE', 'EYE', 'FAR', 'FAT', 'FED', 'FEE', 'FEW', 'FIT', 'FLY', 'FOR', 'FUN', 'GAP', 'GAS', 'GAY', 'GET', 'GOD', 'GOT', 'GUN', 'GUY', 'HAD', 'HAS', 'HAT', 'HER', 'HID', 'HIM', 'HIS', 'HIT', 'HOT', 'HOW', 'ICE', 'ILL', 'ITS', 'JOB', 'JOY', 'KEY', 'KID', 'LAP', 'LAW', 'LAY', 'LED', 'LEG', 'LET', 'LIE', 'LIP', 'LOT', 'MAD', 'MAN', 'MAP', 'MAY', 'MEN', 'MET', 'MIX', 'MOM', 'MUD', 'NET', 'NEW', 'NOR', 'NOT', 'NOW', 'NUT', 'ODD', 'OFF', 'OFT', 'OIL', 'OLD', 'ONE', 'OUR', 'OUT', 'OWE', 'OWN', 'PAD', 'PAN', 'PAT', 'PAY', 'PEN', 'PER', 'PET', 'PIE', 'PIN', 'PIT', 'POP', 'POT', 'PRO', 'PUT', 'RAN', 'RAT', 'RAW', 'RED', 'RID', 'ROB', 'ROD', 'ROW', 'RUB', 'RUN', 'SAD', 'SAT', 'SAW', 'SAY', 'SEA', 'SEE', 'SET', 'SHE', 'SIT', 'SIX', 'SKI', 'SKY', 'SLY', 'SON', 'SUM', 'SUN', 'TAB', 'TAP', 'TAX', 'TEA', 'TEN', 'THE', 'TIE', 'TIP', 'TOE', 'TON', 'TOO', 'TOP', 'TOY', 'TRY', 'TWO', 'USE', 'VAN', 'VIA', 'WAR', 'WAS', 'WAY', 'WEB', 'WED', 'WET', 'WHO', 'WHY', 'WIN', 'WIT', 'WON', 'YEA', 'YES', 'YET', 'YOU',
+  // Common 4-letter words
+  'ABLE', 'ALSO', 'ANTI', 'AREA', 'ARMY', 'AWAY', 'BABY', 'BACK', 'BALL', 'BAND', 'BANK', 'BASE', 'BATH', 'BEAR', 'BEAT', 'BEEN', 'BEER', 'BELL', 'BELT', 'BEND', 'BENT', 'BEST', 'BILL', 'BIRD', 'BITE', 'BLOW', 'BLUE', 'BOAT', 'BODY', 'BOLD', 'BOMB', 'BOND', 'BONE', 'BOOK', 'BOOT', 'BORE', 'BORN', 'BOSS', 'BOTH', 'BOWL', 'BOYS', 'BURN', 'BUSY', 'CAFE', 'CAKE', 'CALL', 'CALM', 'CAME', 'CAMP', 'CAPS', 'CARD', 'CARE', 'CARS', 'CASE', 'CASH', 'CAST', 'CENT', 'CHAT', 'CITY', 'CLUB', 'COAT', 'CODE', 'COLD', 'COME', 'COOK', 'COOL', 'COPE', 'COPY', 'CORE', 'COST', 'CREW', 'CROP', 'DARK', 'DATA', 'DATE', 'DAYS', 'DEAD', 'DEAL', 'DEAR', 'DEBT', 'DECK', 'DEEP', 'DEMO', 'DENY', 'DESK', 'DIAL', 'DIED', 'DIET', 'DIRT', 'DOES', 'DONE', 'DOOR', 'DOSE', 'DOWN', 'DRAW', 'DREW', 'DROP', 'DRUG', 'DUAL', 'DUST', 'DUTY', 'EACH', 'EARN', 'EARS', 'EASE', 'EAST', 'EASY', 'EDGE', 'EDIT', 'EGGS', 'ELSE', 'ENDS', 'EVEN', 'EVER', 'EXAM', 'EXEC', 'EXIT', 'FACE', 'FACT', 'FADE', 'FAIL', 'FAIR', 'FAKE', 'FALL', 'FAME', 'FANS', 'FARE', 'FARM', 'FAST', 'FATE', 'FEAR', 'FEED', 'FEEL', 'FEET', 'FELL', 'FELT', 'FILE', 'FILL', 'FILM', 'FIND', 'FINE', 'FIRE', 'FIRM', 'FISH', 'FIVE', 'FLAT', 'FLED', 'FLEW', 'FLIP', 'FLOW', 'FOLD', 'FOLK', 'FONT', 'FOOD', 'FOOL', 'FOOT', 'FORD', 'FORM', 'FORT', 'FOUR', 'FREE', 'FROM', 'FUEL', 'FULL', 'FUND', 'GAIN', 'GAME', 'GATE', 'GAVE', 'GEAR', 'GENE', 'GIFT', 'GIRL', 'GIVE', 'GLAD', 'GOES', 'GOLD', 'GOLF', 'GONE', 'GOOD', 'GRAB', 'GRAY', 'GREW', 'GREY', 'GRID', 'GRIP', 'GROW', 'GULF', 'GUYS', 'HAIR', 'HALF', 'HALL', 'HAND', 'HANG', 'HARD', 'HARM', 'HATE', 'HAVE', 'HEAD', 'HEAR', 'HEAT', 'HEEL', 'HELD', 'HELL', 'HELP', 'HERE', 'HERO', 'HIDE', 'HIGH', 'HILL', 'HINT', 'HIRE', 'HOLD', 'HOLE', 'HOLY', 'HOME', 'HOPE', 'HOST', 'HOUR', 'HUGE', 'HUNG', 'HUNT', 'HURT', 'ICON', 'IDEA', 'INFO', 'INTO', 'IRON', 'ITEM', 'JACK', 'JANE', 'JEAN', 'JOBS', 'JOIN', 'JOKE', 'JULY', 'JUMP', 'JUNE', 'JURY', 'JUST', 'KEEN', 'KEEP', 'KEPT', 'KICK', 'KIDS', 'KILL', 'KIND', 'KING', 'KNEE', 'KNEW', 'KNOW', 'LABS', 'LACK', 'LADY', 'LAID', 'LAKE', 'LAMP', 'LAND', 'LANE', 'LAST', 'LATE', 'LAWS', 'LEAD', 'LEAN', 'LEAP', 'LEFT', 'LEGS', 'LEND', 'LENS', 'LESS', 'LETS', 'LIAR', 'LIES', 'LIFE', 'LIFT', 'LIKE', 'LINE', 'LINK', 'LIST', 'LIVE', 'LOAD', 'LOAN', 'LOCK', 'LOGO', 'LONG', 'LOOK', 'LORD', 'LOSE', 'LOSS', 'LOST', 'LOTS', 'LOUD', 'LOVE', 'LUCK', 'MADE', 'MAIL', 'MAIN', 'MAKE', 'MALE', 'MALL', 'MANY', 'MAPS', 'MARK', 'MARS', 'MASS', 'MATE', 'MATH', 'MEAL', 'MEAN', 'MEAT', 'MEET', 'MEMO', 'MENU', 'MERE', 'MESS', 'MIDI', 'MILD', 'MILE', 'MILK', 'MILL', 'MIND', 'MINE', 'MINI', 'MINT', 'MISS', 'MODE', 'MOOD', 'MOON', 'MORE', 'MOST', 'MOVE', 'MUCH', 'MUST', 'MYTH', 'NAIL', 'NAME', 'NAVY', 'NEAR', 'NEAT', 'NECK', 'NEED', 'NEWS', 'NEXT', 'NICE', 'NICK', 'NINE', 'NODE', 'NONE', 'NOON', 'NORM', 'NOSE', 'NOTE', 'NOUN', 'ODDS', 'OKAY', 'ONCE', 'ONES', 'ONLY', 'ONTO', 'OPEN', 'ORAL', 'OURS', 'OVEN', 'OVER', 'PACE', 'PACK', 'PAGE', 'PAID', 'PAIN', 'PAIR', 'PALE', 'PALM', 'PARA', 'PARK', 'PART', 'PASS', 'PAST', 'PATH', 'PEAK', 'PEER', 'PICK', 'PIGS', 'PILE', 'PINK', 'PIPE', 'PLAN', 'PLAY', 'PLEA', 'PLOT', 'PLUS', 'POEM', 'POET', 'POLL', 'POND', 'POOL', 'POOR', 'PORT', 'POSE', 'POST', 'POUR', 'PRAY', 'PREP', 'PREY', 'PROS', 'PULL', 'PUMP', 'PURE', 'PUSH', 'QUIT', 'QUIZ', 'RACE', 'RAGE', 'RAID', 'RAIL', 'RAIN', 'RANG', 'RANK', 'RARE', 'RATE', 'READ', 'REAL', 'REAR', 'RELY', 'RENT', 'REST', 'RICE', 'RICH', 'RIDE', 'RING', 'RISE', 'RISK', 'ROAD', 'ROCK', 'RODE', 'ROLE', 'ROLL', 'ROOF', 'ROOM', 'ROOT', 'ROPE', 'ROSE', 'ROWS', 'RUDE', 'RULE', 'RUSH', 'SAFE', 'SAGE', 'SAID', 'SAIL', 'SAKE', 'SALE', 'SALT', 'SAME', 'SAND', 'SANG', 'SANK', 'SAVE', 'SAYS', 'SEAL', 'SEAT', 'SEED', 'SEEK', 'SEEM', 'SEEN', 'SELF', 'SELL', 'SEND', 'SENT', 'SEPT', 'SHIP', 'SHOP', 'SHOT', 'SHOW', 'SHUT', 'SICK', 'SIDE', 'SIGN', 'SILK', 'SINK', 'SITE', 'SIZE', 'SKIN', 'SLIP', 'SLOW', 'SNAP', 'SNOW', 'SOFT', 'SOIL', 'SOLD', 'SOLE', 'SOLO', 'SOME', 'SONG', 'SOON', 'SORT', 'SOUL', 'SOUP', 'SPAN', 'SPIN', 'SPOT', 'STAR', 'STAY', 'STEM', 'STEP', 'STOP', 'SUCH', 'SUIT', 'SURE', 'SWIM', 'TABS', 'TAIL', 'TAKE', 'TALE', 'TALK', 'TALL', 'TANK', 'TAPE', 'TASK', 'TEAM', 'TEAR', 'TECH', 'TEEN', 'TELL', 'TEMP', 'TEND', 'TENT', 'TERM', 'TEST', 'TEXT', 'THAN', 'THAT', 'THEM', 'THEN', 'THEY', 'THIN', 'THIS', 'THUS', 'TIDE', 'TIED', 'TIER', 'TIES', 'TILE', 'TILL', 'TIME', 'TINY', 'TIPS', 'TIRE', 'TOLD', 'TOLL', 'TONE', 'TONS', 'TOOK', 'TOOL', 'TOPS', 'TORE', 'TORN', 'TOUR', 'TOWN', 'TOYS', 'TREE', 'TRIM', 'TRIO', 'TRUE', 'TUBE', 'TUNE', 'TURN', 'TWIN', 'TYPE', 'UGLY', 'UNIT', 'UPON', 'URGE', 'USED', 'USER', 'USES', 'VAST', 'VERB', 'VERY', 'VICE', 'VIEW', 'VISA', 'VOID', 'VOTE', 'WAGE', 'WAIT', 'WAKE', 'WALK', 'WALL', 'WANT', 'WARD', 'WARM', 'WARN', 'WASH', 'WAVE', 'WAYS', 'WEAK', 'WEAR', 'WEEK', 'WELL', 'WENT', 'WERE', 'WEST', 'WHAT', 'WHEN', 'WIDE', 'WIFE', 'WILD', 'WILL', 'WIND', 'WINE', 'WING', 'WIRE', 'WISE', 'WISH', 'WITH', 'WOKE', 'WOLF', 'WOOD', 'WOOL', 'WORD', 'WORE', 'WORK', 'WORN', 'WRAP', 'YARD', 'YEAH', 'YEAR', 'YOUR', 'ZERO', 'ZONE', 'ZOOM',
+  // Technical/common abbreviations that aren't tickers
+  'HTTP', 'HTML', 'JSON', 'ASAP', 'RSVP', 'MISC', 'CTRL', 'WIFI', 'USB', 'PDF', 'CEO', 'CFO', 'COO', 'CTO', 'LLC', 'INC', 'LTD', 'EST', 'PST', 'GMT', 'UTC', 'USA', 'NYC', 'GDP', 'API', 'SDK', 'URL', 'SQL', 'CSS', 'PHP', 'XML', 'DNS', 'VPN', 'RAM', 'ROM', 'SSD', 'HDD', 'CPU', 'GPU',
+]);
+
+// Contextual patterns that indicate a ticker follows
+const TICKER_CONTEXT_PATTERNS = [
+  /\b(?:long|short|bullish|bearish|buy|sell|buying|selling|bought|sold|holding|hold|owns?|owned)\s+(?:on\s+)?([A-Z]{1,5})\b/gi,
+  /\b(?:calls?|puts?|options?)\s+(?:on\s+)?([A-Z]{1,5})\b/gi,
+  /\b([A-Z]{1,5})\s+(?:calls?|puts?|options?|shares?|stock)\b/gi,
+  /\b(?:shares?\s+of|stock\s+in|position\s+in|invested?\s+in|exposure\s+to)\s+([A-Z]{1,5})\b/gi,
+  /\b([A-Z]{1,5})\s+(?:is\s+)?(?:up|down|flat|green|red|mooning|tanking|pumping|dumping|ripping|drilling)\b/gi,
+  /\b(?:watching|eyeing|looking\s+at|interested\s+in|adding|accumulating)\s+([A-Z]{1,5})\b/gi,
+  /\b([A-Z]{1,5})\s+(?:earnings?|er|guidance|revenue|beat|miss(?:ed)?|report)\b/gi,
+  /\b(?:loading|loaded|bag(?:s|holding)?|yolo(?:ed|ing)?)\s+(?:up\s+(?:on\s+)?)?([A-Z]{1,5})\b/gi,
+];
 
 // Common company name to ticker mappings
 const COMPANY_NAMES: Record<string, string> = {
@@ -798,11 +826,8 @@ export function parseAssets(text: string): ParsedAsset[] {
   const assets: ParsedAsset[] = [];
   const seenSymbols = new Set<string>();
 
-  // 1. Parse cashtags ($AAPL)
-  const cashtagRegex = /\$([A-Z]{1,5})\b/gi;
-  let match;
-  while ((match = cashtagRegex.exec(text)) !== null) {
-    const symbol = match[1].toUpperCase();
+  // Helper to add a stock if not seen
+  const addStock = (symbol: string, originalText: string) => {
     const key = `stock:${symbol}`;
     if (!seenSymbols.has(key)) {
       seenSymbols.add(key);
@@ -810,26 +835,57 @@ export function parseAssets(text: string): ParsedAsset[] {
         type: 'stock',
         symbol,
         displaySymbol: symbol,
-        originalText: match[0],
+        originalText,
       });
+    }
+  };
+
+  // 1. Parse cashtags ($AAPL) - highest priority, always accept
+  const cashtagRegex = /\$([A-Z]{1,5})\b/gi;
+  let match;
+  while ((match = cashtagRegex.exec(text)) !== null) {
+    const symbol = match[1].toUpperCase();
+    addStock(symbol, match[0]);
+  }
+
+  // 1b. Parse contextual mentions (e.g., "bullish on XYZ", "long ABC", "XYZ calls")
+  for (const pattern of TICKER_CONTEXT_PATTERNS) {
+    // Reset lastIndex for each pattern
+    pattern.lastIndex = 0;
+    while ((match = pattern.exec(text)) !== null) {
+      const symbol = match[1].toUpperCase();
+      // Accept contextual tickers even if they're short or look like words
+      // as long as they're not obviously common words
+      if (symbol.length >= 1 && symbol.length <= 5) {
+        addStock(symbol, match[0]);
+      }
     }
   }
 
-  // 1b. Parse well-known bare tickers (MSFT, NVDA, etc.) - only from whitelist
-  const bareTickerRegex = /\b([A-Z]{2,5})\b/g;
+  // 1c. Parse well-known bare tickers (MSFT, NVDA, etc.) - from whitelist
+  const bareTickerRegex = /\b([A-Z]{1,5})\b/g;
   while ((match = bareTickerRegex.exec(text)) !== null) {
     const symbol = match[1];
-    // Only accept if it's in our whitelist of common tickers
+    // Accept if it's in our whitelist of common tickers
     if (COMMON_TICKERS.has(symbol)) {
-      const key = `stock:${symbol}`;
-      if (!seenSymbols.has(key)) {
-        seenSymbols.add(key);
-        assets.push({
-          type: 'stock',
-          symbol,
-          displaySymbol: symbol,
-          originalText: match[0],
-        });
+      addStock(symbol, match[0]);
+    }
+  }
+
+  // 1d. Aggressive detection: any uppercase 2-5 letter word not in blacklist
+  // This catches lesser-known tickers that might not be in our whitelist
+  const aggressiveTickerRegex = /\b([A-Z]{2,5})\b/g;
+  while ((match = aggressiveTickerRegex.exec(text)) !== null) {
+    const symbol = match[1];
+    // Accept if not a common English word and looks like a ticker
+    if (!ENGLISH_WORD_BLACKLIST.has(symbol) && !COMMON_TICKERS.has(symbol)) {
+      // Additional heuristics: avoid words that are too "wordy"
+      // Accept if it has numbers mixed in, or unusual letter patterns
+      const hasUnusualPattern = /[QXZJK]/.test(symbol) || // Less common letters in English
+                                /(.)\1/.test(symbol) ||   // Repeated letters (like AAPL)
+                                symbol.length >= 4;        // Longer symbols more likely to be tickers
+      if (hasUnusualPattern) {
+        addStock(symbol, match[0]);
       }
     }
   }
