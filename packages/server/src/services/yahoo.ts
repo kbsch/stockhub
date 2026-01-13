@@ -170,13 +170,49 @@ export async function getOptionQuote(
   if (cached) return cached;
 
   try {
-    // Convert expiry date to Unix timestamp
-    const expiryDate = new Date(expiry);
-    expiryDate.setUTCHours(20, 0, 0, 0); // Options expire at 4PM ET = 20:00 UTC
-    const expiryTimestamp = Math.floor(expiryDate.getTime() / 1000);
+    // Convert expiry date to Unix timestamp (midnight UTC)
+    const targetDate = new Date(expiry);
+    targetDate.setUTCHours(0, 0, 0, 0);
+    const targetTimestamp = Math.floor(targetDate.getTime() / 1000);
 
-    // Fetch options chain - Yahoo returns all expirations if we request the specific date
-    const url = `https://query1.finance.yahoo.com/v7/finance/options/${encodeURIComponent(underlying)}?date=${expiryTimestamp}`;
+    // First, fetch available expirations from Yahoo
+    const baseUrl = `https://query1.finance.yahoo.com/v7/finance/options/${encodeURIComponent(underlying)}`;
+    const baseRes = await fetch(baseUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      },
+    });
+
+    if (!baseRes.ok) return null;
+
+    const baseData = await baseRes.json();
+    const baseChain = baseData?.optionChain?.result?.[0];
+    if (!baseChain) return null;
+
+    const expirationDates: number[] = baseChain.expirationDates || [];
+    if (expirationDates.length === 0) return null;
+
+    // Find the closest expiration date to our target
+    let closestExpiration = expirationDates[0];
+    let closestDiff = Math.abs(expirationDates[0] - targetTimestamp);
+
+    for (const exp of expirationDates) {
+      const diff = Math.abs(exp - targetTimestamp);
+      if (diff < closestDiff) {
+        closestDiff = diff;
+        closestExpiration = exp;
+      }
+    }
+
+    // Only use the closest expiration if it's within 7 days of our target
+    const sevenDays = 7 * 24 * 60 * 60;
+    if (closestDiff > sevenDays) {
+      console.log(`No expiration within 7 days of ${expiry} for ${underlying}`);
+      return null;
+    }
+
+    // Fetch options chain for the matched expiration
+    const url = `${baseUrl}?date=${closestExpiration}`;
     const res = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
