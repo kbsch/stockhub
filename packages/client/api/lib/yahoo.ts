@@ -28,6 +28,52 @@ interface CacheEntry<T> {
 const cache = new Map<string, CacheEntry<unknown>>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
+// Yahoo Finance crumb/cookie handling
+let yahooCrumb: string | null = null;
+let yahooCookies: string | null = null;
+let crumbExpiry = 0;
+
+async function getYahooCrumb(): Promise<{ crumb: string; cookies: string } | null> {
+  // Return cached crumb if still valid (cache for 1 hour)
+  if (yahooCrumb && yahooCookies && Date.now() < crumbExpiry) {
+    return { crumb: yahooCrumb, cookies: yahooCookies };
+  }
+
+  try {
+    // First, get cookies from Yahoo Finance
+    const initRes = await fetch('https://fc.yahoo.com', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      },
+    });
+
+    const cookies = initRes.headers.get('set-cookie') || '';
+
+    // Then get the crumb
+    const crumbRes = await fetch('https://query1.finance.yahoo.com/v1/test/getcrumb', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Cookie': cookies,
+      },
+    });
+
+    if (!crumbRes.ok) return null;
+
+    const crumb = await crumbRes.text();
+    if (!crumb || crumb.includes('error')) return null;
+
+    // Cache for 1 hour
+    yahooCrumb = crumb;
+    yahooCookies = cookies;
+    crumbExpiry = Date.now() + 60 * 60 * 1000;
+
+    return { crumb, cookies };
+  } catch (err) {
+    console.error('Error fetching Yahoo crumb:', err);
+    return null;
+  }
+}
+
 function getCached<T>(key: string): T | null {
   const entry = cache.get(key);
   if (!entry) return null;
@@ -169,6 +215,13 @@ export async function getOptionQuote(
   if (cached) return cached;
 
   try {
+    // Get Yahoo crumb for authentication
+    const auth = await getYahooCrumb();
+    if (!auth) {
+      console.error('Failed to get Yahoo crumb for options API');
+      return null;
+    }
+
     // Convert expiry date to Unix timestamp (midnight UTC)
     const targetDate = new Date(expiry);
     targetDate.setUTCHours(0, 0, 0, 0);
@@ -176,20 +229,30 @@ export async function getOptionQuote(
 
     // First, fetch available expirations from Yahoo
     const baseUrl = `https://query1.finance.yahoo.com/v7/finance/options/${encodeURIComponent(underlying)}`;
-    const baseRes = await fetch(baseUrl, {
+    const baseRes = await fetch(`${baseUrl}?crumb=${encodeURIComponent(auth.crumb)}`, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Cookie': auth.cookies,
       },
     });
 
-    if (!baseRes.ok) return null;
+    if (!baseRes.ok) {
+      console.error(`Options API returned ${baseRes.status} for ${underlying}`);
+      return null;
+    }
 
     const baseData = await baseRes.json();
     const baseChain = baseData?.optionChain?.result?.[0];
-    if (!baseChain) return null;
+    if (!baseChain) {
+      console.error(`No option chain result for ${underlying}`);
+      return null;
+    }
 
     const expirationDates: number[] = baseChain.expirationDates || [];
-    if (expirationDates.length === 0) return null;
+    if (expirationDates.length === 0) {
+      console.error(`No expiration dates for ${underlying}`);
+      return null;
+    }
 
     // Find the closest expiration date to our target
     let closestExpiration = expirationDates[0];
@@ -206,15 +269,16 @@ export async function getOptionQuote(
     // Only use the closest expiration if it's within 7 days of our target
     const sevenDays = 7 * 24 * 60 * 60;
     if (closestDiff > sevenDays) {
-      console.log(`No expiration within 7 days of ${expiry} for ${underlying}`);
+      console.log(`No expiration within 7 days of ${expiry} for ${underlying}. Closest: ${new Date(closestExpiration * 1000).toISOString()}`);
       return null;
     }
 
     // Fetch options chain for the matched expiration
-    const url = `${baseUrl}?date=${closestExpiration}`;
+    const url = `${baseUrl}?date=${closestExpiration}&crumb=${encodeURIComponent(auth.crumb)}`;
     const res = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Cookie': auth.cookies,
       },
     });
 
