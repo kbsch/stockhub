@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ParsedAsset } from '../lib/parser';
-import { fetchQuote, fetchChart, QuoteData, ChartData } from '../lib/api';
+import { fetchQuote, fetchOptionQuote, fetchChart, QuoteData, ChartData } from '../lib/api';
 import { Chart } from './Chart';
 import { SymbolStatus } from '../App';
 
@@ -39,16 +39,35 @@ export function AssetCard({ asset, compact = false, animationDelay = 0, isExitin
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [expanded]);
 
-  // For options, we chart the underlying
+  // For options, we chart the underlying but quote the option itself
   const chartSymbol = asset.metadata?.underlying || asset.symbol;
-  const quoteSymbol = asset.type === 'bond' ? null : chartSymbol;
+  const isOption = asset.type === 'option' && asset.metadata?.underlying && asset.metadata?.strike && asset.metadata?.callPut && asset.metadata?.expiry;
+  const quoteSymbol = asset.type === 'bond' ? null : (isOption ? null : chartSymbol);
 
-  const { data: quote, isLoading: quoteLoading, isError: quoteError } = useQuery<QuoteData>({
+  // Regular quote for non-options
+  const { data: stockQuote, isLoading: stockQuoteLoading, isError: stockQuoteError } = useQuery<QuoteData>({
     queryKey: ['quote', quoteSymbol],
     queryFn: () => fetchQuote(quoteSymbol!),
     enabled: !!quoteSymbol,
     retry: 1,
   });
+
+  // Option quote for options
+  const { data: optionQuote, isLoading: optionQuoteLoading, isError: optionQuoteError } = useQuery<QuoteData>({
+    queryKey: ['optionQuote', asset.metadata?.underlying, asset.metadata?.strike, asset.metadata?.callPut, asset.metadata?.expiry],
+    queryFn: () => fetchOptionQuote({
+      underlying: asset.metadata!.underlying!,
+      strike: asset.metadata!.strike!,
+      callPut: asset.metadata!.callPut as 'call' | 'put',
+      expiry: asset.metadata!.expiry!,
+    }),
+    enabled: !!isOption,
+    retry: 1,
+  });
+
+  const quote = isOption ? optionQuote : stockQuote;
+  const quoteLoading = isOption ? optionQuoteLoading : stockQuoteLoading;
+  const quoteError = isOption ? optionQuoteError : stockQuoteError;
 
   const { data: chart, isLoading: chartLoading, isError: chartError } = useQuery<ChartData>({
     queryKey: ['chart', chartSymbol, range],
@@ -175,6 +194,16 @@ export function AssetCard({ asset, compact = false, animationDelay = 0, isExitin
               <span className="text-gray-400">
                 Expiry: <span className="text-white">{asset.metadata.expiry}</span>
               </span>
+              {quote?.bid != null && quote?.ask != null && (
+                <span className="text-gray-400">
+                  Bid/Ask: <span className="text-white">${quote.bid.toFixed(2)} / ${quote.ask.toFixed(2)}</span>
+                </span>
+              )}
+              {quote?.impliedVolatility != null && (
+                <span className="text-gray-400">
+                  IV: <span className="text-white">{(quote.impliedVolatility * 100).toFixed(1)}%</span>
+                </span>
+              )}
             </div>
           )}
         </div>
@@ -271,7 +300,7 @@ export function AssetCard({ asset, compact = false, animationDelay = 0, isExitin
 
         {/* Option details - compact inline */}
         {asset.type === 'option' && asset.metadata && (
-          <div className={`flex items-center gap-2 ${compact ? 'mt-1' : 'mt-2'} text-fluid-xs`}>
+          <div className={`flex items-center gap-2 flex-wrap ${compact ? 'mt-1' : 'mt-2'} text-fluid-xs`}>
             <span className="text-gray-400">
               ${asset.metadata.strike}{' '}
               <span className={asset.metadata.callPut === 'call' ? 'text-green-400' : 'text-red-400'}>
@@ -279,6 +308,16 @@ export function AssetCard({ asset, compact = false, animationDelay = 0, isExitin
               </span>
             </span>
             <span className="text-gray-500">{asset.metadata.expiry}</span>
+            {quote?.bid != null && quote?.ask != null && (
+              <span className="text-gray-500">
+                ${quote.bid.toFixed(2)}/${quote.ask.toFixed(2)}
+              </span>
+            )}
+            {quote?.impliedVolatility != null && (
+              <span className="text-gray-500">
+                IV {(quote.impliedVolatility * 100).toFixed(0)}%
+              </span>
+            )}
           </div>
         )}
 

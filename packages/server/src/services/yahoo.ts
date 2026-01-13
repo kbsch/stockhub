@@ -145,6 +145,88 @@ export async function getChart(
   }
 }
 
+export interface OptionQuote {
+  contractSymbol: string;
+  lastPrice: number;
+  change: number;
+  percentChange: number;
+  bid: number;
+  ask: number;
+  volume: number;
+  openInterest: number;
+  impliedVolatility: number;
+  strike: number;
+  expiration: number;
+}
+
+export async function getOptionQuote(
+  underlying: string,
+  strike: number,
+  callPut: 'call' | 'put',
+  expiry: string // YYYY-MM-DD format
+): Promise<OptionQuote | null> {
+  const cacheKey = `option:${underlying}:${strike}:${callPut}:${expiry}`;
+  const cached = getCached<OptionQuote>(cacheKey);
+  if (cached) return cached;
+
+  try {
+    // Convert expiry date to Unix timestamp
+    const expiryDate = new Date(expiry);
+    expiryDate.setUTCHours(20, 0, 0, 0); // Options expire at 4PM ET = 20:00 UTC
+    const expiryTimestamp = Math.floor(expiryDate.getTime() / 1000);
+
+    // Fetch options chain - Yahoo returns all expirations if we request the specific date
+    const url = `https://query1.finance.yahoo.com/v7/finance/options/${encodeURIComponent(underlying)}?date=${expiryTimestamp}`;
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      },
+    });
+
+    if (!res.ok) return null;
+
+    const data = await res.json();
+    const optionChain = data?.optionChain?.result?.[0];
+
+    if (!optionChain) return null;
+
+    // Find the options for the requested expiration
+    const options = optionChain.options?.[0];
+    if (!options) return null;
+
+    // Get the correct list based on call/put
+    const contractList = callPut === 'call' ? options.calls : options.puts;
+    if (!contractList || contractList.length === 0) return null;
+
+    // Find the contract with matching strike price
+    const contract = contractList.find(
+      (c: { strike: number }) => Math.abs(c.strike - strike) < 0.01
+    );
+
+    if (!contract) return null;
+
+    const result: OptionQuote = {
+      contractSymbol: contract.contractSymbol,
+      lastPrice: contract.lastPrice ?? 0,
+      change: contract.change ?? 0,
+      percentChange: contract.percentChange ?? 0,
+      bid: contract.bid ?? 0,
+      ask: contract.ask ?? 0,
+      volume: contract.volume ?? 0,
+      openInterest: contract.openInterest ?? 0,
+      impliedVolatility: contract.impliedVolatility ?? 0,
+      strike: contract.strike,
+      expiration: contract.expiration,
+    };
+
+    setCache(cacheKey, result);
+    return result;
+  } catch (err) {
+    console.error(`Error fetching option quote for ${underlying} ${strike}${callPut === 'call' ? 'C' : 'P'} ${expiry}:`, err);
+    return null;
+  }
+}
+
 export async function searchSymbol(
   query: string
 ): Promise<Array<{ symbol: string; name: string; type: string }>> {

@@ -5,7 +5,20 @@ export interface QuoteData {
   change: number;
   changePercent: number;
   timestamp: number;
-  isEconomic: boolean;
+  isEconomic?: boolean;
+  isOption?: boolean;
+  bid?: number;
+  ask?: number;
+  volume?: number;
+  openInterest?: number;
+  impliedVolatility?: number;
+}
+
+export interface OptionParams {
+  underlying: string;
+  strike: number;
+  callPut: 'call' | 'put';
+  expiry: string;
 }
 
 export interface ChartPoint {
@@ -29,6 +42,22 @@ export async function fetchQuote(symbol: string): Promise<QuoteData> {
   const res = await fetch(`${API_BASE}/quote/${encodeURIComponent(symbol)}`);
   if (!res.ok) {
     throw new Error(`Failed to fetch quote for ${symbol}`);
+  }
+  return res.json();
+}
+
+export async function fetchOptionQuote(params: OptionParams): Promise<QuoteData> {
+  const { underlying, strike, callPut, expiry } = params;
+  const queryParams = new URLSearchParams({
+    strike: strike.toString(),
+    callPut,
+    expiry,
+  });
+  const res = await fetch(
+    `${API_BASE}/quote/${encodeURIComponent(underlying)}?${queryParams}`
+  );
+  if (!res.ok) {
+    throw new Error(`Failed to fetch option quote for ${underlying} ${strike}${callPut === 'call' ? 'C' : 'P'} ${expiry}`);
   }
   return res.json();
 }
