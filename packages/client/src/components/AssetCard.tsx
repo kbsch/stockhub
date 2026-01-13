@@ -124,15 +124,15 @@ export function AssetCard({ asset, compact = false, animationDelay = 0, isExitin
   const getTypeBadgeColor = () => {
     switch (asset.type) {
       case 'stock':
-        return 'bg-blue-500/20 text-blue-400';
+        return 'bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400';
       case 'option':
-        return 'bg-purple-500/20 text-purple-400';
+        return 'bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400';
       case 'bond':
-        return 'bg-amber-500/20 text-amber-400';
+        return 'bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400';
       case 'economic':
-        return 'bg-emerald-500/20 text-emerald-400';
+        return 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400';
       default:
-        return 'bg-gray-500/20 text-gray-400';
+        return 'bg-gray-100 dark:bg-gray-500/20 text-gray-600 dark:text-gray-400';
     }
   };
 
@@ -141,29 +141,29 @@ export function AssetCard({ asset, compact = false, animationDelay = 0, isExitin
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4 md:p-8">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/70 animate-fade-in"
+        className="absolute inset-0 bg-black/50 dark:bg-black/70 animate-fade-in"
         onClick={() => setExpanded(false)}
       />
       {/* Expanded card - full screen on mobile, constrained on larger screens */}
-      <div className="relative w-full h-full md:w-[85vw] md:h-[85vh] lg:w-[75vw] lg:h-[75vh] xl:max-w-6xl xl:max-h-[80vh] bg-gray-900 rounded-lg md:rounded-xl border border-gray-700 overflow-hidden flex flex-col shadow-2xl animate-scale-in">
+      <div className="relative w-full h-full md:w-[85vw] md:h-[85vh] lg:w-[75vw] lg:h-[75vh] xl:max-w-6xl xl:max-h-[80vh] bg-white dark:bg-gray-900 rounded-lg md:rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col shadow-2xl animate-scale-in">
         {/* Header */}
-        <div className="p-fluid-3 border-b border-gray-800 flex-shrink-0">
+        <div className="p-fluid-3 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
           <div className="flex items-start justify-between gap-2 sm:gap-4">
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className={`text-fluid-xs font-medium px-2 py-0.5 rounded-full ${getTypeBadgeColor()}`}>
                   {getTypeLabel()}
                 </span>
-                <span className="text-gray-400 text-fluid-sm font-medium">{asset.displaySymbol}</span>
+                <span className="text-gray-500 dark:text-gray-400 text-fluid-sm font-medium">{asset.displaySymbol}</span>
               </div>
-              <h3 className="text-fluid-2xl font-bold text-white mt-1 truncate">{quote?.name || asset.displaySymbol}</h3>
+              <h3 className="text-fluid-2xl font-bold text-gray-900 dark:text-white mt-1 truncate">{quote?.name || asset.displaySymbol}</h3>
             </div>
 
             {quote && quote.price != null && (
               <div className="text-right flex-shrink-0">
-                <p className="text-fluid-xl sm:text-fluid-2xl font-bold text-white">${quote.price.toFixed(2)}</p>
+                <p className="text-fluid-xl sm:text-fluid-2xl font-bold text-gray-900 dark:text-white">${quote.price.toFixed(2)}</p>
                 {quote.change != null && quote.changePercent != null && (
-                  <p className={`text-fluid-sm font-medium ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
+                  <p className={`text-fluid-sm font-medium ${isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                     {isPositive ? '+' : ''}{quote.change.toFixed(2)} ({isPositive ? '+' : ''}{quote.changePercent.toFixed(2)}%)
                   </p>
                 )}
@@ -172,7 +172,7 @@ export function AssetCard({ asset, compact = false, animationDelay = 0, isExitin
 
             <button
               onClick={() => setExpanded(false)}
-              className="text-gray-400 hover:text-white transition-colors p-1 flex-shrink-0"
+              className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors p-1 flex-shrink-0"
             >
               <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -183,25 +183,25 @@ export function AssetCard({ asset, compact = false, animationDelay = 0, isExitin
           {/* Option details */}
           {asset.type === 'option' && asset.metadata && (
             <div className="flex items-center gap-2 sm:gap-4 mt-2 text-fluid-sm flex-wrap">
-              <span className="text-gray-400">
-                Strike: <span className="text-white">${asset.metadata.strike}</span>
+              <span className="text-gray-500 dark:text-gray-400">
+                Strike: <span className="text-gray-900 dark:text-white">${asset.metadata.strike}</span>
               </span>
-              <span className="text-gray-400">
-                Type: <span className={asset.metadata.callPut === 'call' ? 'text-green-400' : 'text-red-400'}>
+              <span className="text-gray-500 dark:text-gray-400">
+                Type: <span className={asset.metadata.callPut === 'call' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
                   {asset.metadata.callPut?.toUpperCase()}
                 </span>
               </span>
-              <span className="text-gray-400">
-                Expiry: <span className="text-white">{asset.metadata.expiry}</span>
+              <span className="text-gray-500 dark:text-gray-400">
+                Expiry: <span className="text-gray-900 dark:text-white">{asset.metadata.expiry}</span>
               </span>
               {quote?.bid != null && quote?.ask != null && (
-                <span className="text-gray-400">
-                  Bid/Ask: <span className="text-white">${quote.bid.toFixed(2)} / ${quote.ask.toFixed(2)}</span>
+                <span className="text-gray-500 dark:text-gray-400">
+                  Bid/Ask: <span className="text-gray-900 dark:text-white">${quote.bid.toFixed(2)} / ${quote.ask.toFixed(2)}</span>
                 </span>
               )}
               {quote?.impliedVolatility != null && (
-                <span className="text-gray-400">
-                  IV: <span className="text-white">{(quote.impliedVolatility * 100).toFixed(1)}%</span>
+                <span className="text-gray-500 dark:text-gray-400">
+                  IV: <span className="text-gray-900 dark:text-white">{(quote.impliedVolatility * 100).toFixed(1)}%</span>
                 </span>
               )}
             </div>
@@ -218,7 +218,7 @@ export function AssetCard({ asset, compact = false, animationDelay = 0, isExitin
                 className={`px-2 sm:px-3 py-1 text-fluid-sm font-medium rounded transition-colors flex-shrink-0 ${
                   range === r
                     ? 'bg-blue-600 text-white'
-                    : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800'
                 }`}
               >
                 {r}
@@ -229,7 +229,7 @@ export function AssetCard({ asset, compact = false, animationDelay = 0, isExitin
 
         {/* Chart area - fills remaining space */}
         <div className="flex-1 p-fluid-3 min-h-0">
-          <div className="w-full h-full bg-gray-800/50 rounded-lg overflow-hidden">
+          <div className="w-full h-full bg-gray-100 dark:bg-gray-800/50 rounded-lg overflow-hidden">
             {chartLoading ? (
               <div className="h-full flex items-center justify-center">
                 <div className="animate-pulse text-gray-500 text-fluid-base">Loading...</div>
@@ -258,11 +258,11 @@ export function AssetCard({ asset, compact = false, animationDelay = 0, isExitin
     >
       {expandedOverlay}
       <div
-        className={`bg-gray-900 rounded-lg border border-gray-800 overflow-hidden transition-all duration-200 hover:border-gray-600 hover:scale-[1.02] hover:shadow-lg hover:shadow-blue-500/10 cursor-pointer ${highlightGlow}`}
+        className={`bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-600 hover:scale-[1.02] hover:shadow-lg hover:shadow-blue-500/10 cursor-pointer ${highlightGlow}`}
         onClick={() => setExpanded(true)}
       >
       {/* Header */}
-      <div className={compact ? 'p-fluid-2' : 'p-fluid-3 border-b border-gray-800'}>
+      <div className={compact ? 'p-fluid-2' : 'p-fluid-3 border-b border-gray-200 dark:border-gray-800'}>
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
@@ -271,24 +271,24 @@ export function AssetCard({ asset, compact = false, animationDelay = 0, isExitin
               >
                 {getTypeLabel()}
               </span>
-              <span className="text-gray-400 text-fluid-xs font-medium">
+              <span className="text-gray-500 dark:text-gray-400 text-fluid-xs font-medium">
                 {asset.displaySymbol}
               </span>
             </div>
-            <h3 className={`${compact ? 'text-fluid-sm' : 'text-fluid-lg'} font-semibold text-white mt-0.5 truncate`}>
+            <h3 className={`${compact ? 'text-fluid-sm' : 'text-fluid-lg'} font-semibold text-gray-900 dark:text-white mt-0.5 truncate`}>
               {quote?.name || asset.displaySymbol}
             </h3>
           </div>
 
           {quote && quote.price != null && (
             <div className="text-right flex-shrink-0">
-              <p className={`${compact ? 'text-fluid-sm' : 'text-fluid-lg'} font-semibold text-white`}>
+              <p className={`${compact ? 'text-fluid-sm' : 'text-fluid-lg'} font-semibold text-gray-900 dark:text-white`}>
                 ${quote.price.toFixed(2)}
               </p>
               {quote.change != null && quote.changePercent != null && (
                 <p
                   className={`${compact ? 'text-fluid-xs' : 'text-fluid-sm'} font-medium ${
-                    isPositive ? 'text-green-400' : 'text-red-400'
+                    isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                   }`}
                 >
                   {isPositive ? '+' : ''}{quote.changePercent.toFixed(2)}%
@@ -301,20 +301,20 @@ export function AssetCard({ asset, compact = false, animationDelay = 0, isExitin
         {/* Option details - compact inline */}
         {asset.type === 'option' && asset.metadata && (
           <div className={`flex items-center gap-2 flex-wrap ${compact ? 'mt-1' : 'mt-2'} text-fluid-xs`}>
-            <span className="text-gray-400">
+            <span className="text-gray-500 dark:text-gray-400">
               ${asset.metadata.strike}{' '}
-              <span className={asset.metadata.callPut === 'call' ? 'text-green-400' : 'text-red-400'}>
+              <span className={asset.metadata.callPut === 'call' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
                 {asset.metadata.callPut === 'call' ? 'C' : 'P'}
               </span>
             </span>
-            <span className="text-gray-500">{asset.metadata.expiry}</span>
+            <span className="text-gray-400 dark:text-gray-500">{asset.metadata.expiry}</span>
             {quote?.bid != null && quote?.ask != null && (
-              <span className="text-gray-500">
+              <span className="text-gray-400 dark:text-gray-500">
                 ${quote.bid.toFixed(2)}/${quote.ask.toFixed(2)}
               </span>
             )}
             {quote?.impliedVolatility != null && (
-              <span className="text-gray-500">
+              <span className="text-gray-400 dark:text-gray-500">
                 IV {(quote.impliedVolatility * 100).toFixed(0)}%
               </span>
             )}
@@ -342,7 +342,7 @@ export function AssetCard({ asset, compact = false, animationDelay = 0, isExitin
                 className={`px-1.5 py-0.5 text-fluid-xs font-medium rounded transition-colors ${
                   range === r
                     ? 'bg-blue-600 text-white'
-                    : 'text-gray-500 hover:text-gray-300 hover:bg-gray-800'
+                    : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                 }`}
               >
                 {r}
@@ -351,14 +351,14 @@ export function AssetCard({ asset, compact = false, animationDelay = 0, isExitin
           </div>
 
           {/* Chart area - responsive height */}
-          <div className={`${compact ? 'h-36 sm:h-40 md:h-44 lg:h-48' : 'h-40 sm:h-44 md:h-48 lg:h-52'} bg-gray-800/50 rounded overflow-hidden`}>
+          <div className={`${compact ? 'h-36 sm:h-40 md:h-44 lg:h-48' : 'h-40 sm:h-44 md:h-48 lg:h-52'} bg-gray-100 dark:bg-gray-800/50 rounded overflow-hidden`}>
             {chartLoading ? (
               <div className="h-full flex items-center justify-center">
                 <div className="animate-pulse text-gray-500 text-fluid-xs">Loading...</div>
               </div>
             ) : chartError || quoteError ? (
               <div className="h-full flex items-center justify-center">
-                <span className="text-red-400 text-fluid-xs">Failed</span>
+                <span className="text-red-500 dark:text-red-400 text-fluid-xs">Failed</span>
               </div>
             ) : chart?.data && chart.data.length > 0 ? (
               <Chart data={chart.data} isPositive={isPositive} />
